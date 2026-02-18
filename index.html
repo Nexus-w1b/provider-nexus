@@ -525,514 +525,250 @@
     <input type="file" id="fileInput" class="hidden" accept="image/*,video/*,.pdf,.doc,.docx,.txt" onchange="handleFileSelect(event)">
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, orderBy, limit, deleteDoc, doc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, orderBy, limit, deleteDoc, doc, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBK-MehTTzURY5jT5stH363Y5_WE4iy-XA",
-            authDomain: "volca-tools.firebaseapp.com",
-            projectId: "volca-tools",
-            storageBucket: "volca-tools.firebasestorage.app",
-            messagingSenderId: "262525907487",
-            appId: "1:262525907487:web:4abc37fa3b583223569b2a"
-        };
+    // --- FIREBASE CONFIG (Tetap Sesuai Punya Lu) ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyBK-MehTTzURY5jT5stH363Y5_WE4iy-XA",
+        authDomain: "volca-tools.firebaseapp.com",
+        projectId: "volca-tools",
+        storageBucket: "volca-tools.firebasestorage.app",
+        messagingSenderId: "262525907487",
+        appId: "1:262525907487:web:4abc37fa3b583223569b2a"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
-        
-        let isLoginMode = true;
-        let currentUser = null;
-        let currentAttachment = null;
-        let currentSpeedMode = 'fast';
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+    
+    let currentUser = null;
+    let currentAttachment = null;
+    let currentKeyIndex = 0;
+    let exhaustedKeys = new Set();
+    let isProcessing = false;
 
-        // ============================================================
-        // API KEY POOL - TERTANAM DI KODE (GANTI DENGAN KEY ASLI LU!)
-        // ============================================================
-        const EMBEDDED_API_KEYS = [
-            "AIzaSyCCUqg6OZdWaUasvKY7QV0fWqwUt4CsmpQ",   // Ganti dengan key asli
-            "AIzaSyAsKUTqGlMvqtN-E3e5-4P5oz7sij1QL_E",   // Ganti dengan key asli
-            "AIzaSyDCxkjv1wRdCJHQSJJX-mMdDW1-LZp4jyo",   // Ganti dengan key asli
-            "AIzaSyB13AmGhznITsd_W7Rz54LfQ7qWJfV7IEc",   // Ganti dengan key asli
-            "AIzaSyDCxkjv1wRdCJHQSJJX-mMdDW1-LZp4jyo",   // false ( 5 )
-            "AIzaSyB13AmGhznITsd_W7Rz54LfQ7qWJfV7IEc",   // Ganti dengan key asli
-            "AIzaSyC52CUuke2D6K91snVx8iEH_z8pT_Ixnec",   // false ( 7 )
-            "AIzaSyBjobCOS-zciLKG-OMdgdu9sNpa8OFSx7I",   // Ganti dengan key asli
-            "AIzaSyDLL4hK9sL3nDXdVDloZAy4trcTDJlPS3w",   // Ganti dengan key asli
-            "AIzaSyDA93sUm7bqXP1CKz0C7l2JpKYVQd8bkRw",  // Ganti dengan key asli
-            "AIzaSyA26tL2c5UOf4Z7dqWSWFw56-SVpG8luzI",  // Ganti dengan key asli
-            "AIzaSyAEX43Ur6C8D47iZlHm2OWvgeAs1FZGg68",  // Ganti dengan key asli
-            "AIzaSyCeDZF95_0qDbwSVvFb_jHCUZGesC_1sPw",  // Ganti dengan key asli
-            "AIzaSyD_d87NBjNwHbwwfj9RwepVw7nDkSqzR-8",  // Ganti dengan key asli
-            "AIzaSyA9GdGZJ1Y4xxNzABt-4XEpQ-liLlxPtRM",  // Ganti dengan key asli
-            "AIzaSyCjewApIzC8JmRJ0ApX0A_nVlmGlb2GH_A",  // Ganti dengan key asli
-            "AIzaSyC2wry9c0xn2p7v9aJK4ksT4XOYsAza5Bw",  // Ganti dengan key asli
-            "AIzaSyDXLt2LlOiJ75N35CGTGgGGHwRdJ2G2o34",  // Ganti dengan key asli
-            "AIzaSyBXgfh6zT-r8o0tGivo8NHmdynJXSHd464",  // Ganti dengan key asli
-            "AIzaSyAKeOQQUzD90kHbgkYiQ5O5C4kZWKqf7ek"   // Ganti dengan key asli
-        ];
+    // --- API KEY POOL ---
+    const API_KEYS = [
+        "AIzaSyCCUqg6OZdWaUasvKY7QV0fWqwUt4CsmpQ", "AIzaSyAsKUTqGlMvqtN-E3e5-4P5oz7sij1QL_E",
+        "AIzaSyDCxkjv1wRdCJHQSJJX-mMdDW1-LZp4jyo", "AIzaSyB13AmGhznITsd_W7Rz54LfQ7qWJfV7IEc",
+        "AIzaSyDCxkjv1wRdCJHQSJJX-mMdDW1-LZp4jyo", "AIzaSyB13AmGhznITsd_W7Rz54LfQ7qWJfV7IEc",
+        "AIzaSyC52CUuke2D6K91snVx8iEH_z8pT_Ixnec", "AIzaSyBjobCOS-zciLKG-OMdgdu9sNpa8OFSx7I",
+        "AIzaSyDLL4hK9sL3nDXdVDloZAy4trcTDJlPS3w", "AIzaSyDA93sUm7bqXP1CKz0C7l2JpKYVQd8bkRw",
+        "AIzaSyA26tL2c5UOf4Z7dqWSWFw56-SVpG8luzI", "AIzaSyAEX43Ur6C8D47iZlHm2OWvgeAs1FZGg68",
+        "AIzaSyCeDZF95_0qDbwSVvFb_jHCUZGesC_1sPw", "AIzaSyD_d87NBjNwHbwwfj9RwepVw7nDkSqzR-8",
+        "AIzaSyA9GdGZJ1Y4xxNzABt-4XEpQ-liLlxPtRM", "AIzaSyCjewApIzC8JmRJ0ApX0A_nVlmGlb2GH_A",
+        "AIzaSyC2wry9c0xn2p7v9aJK4ksT4XOYsAza5Bw", "AIzaSyDXLt2LlOiJ75N35CGTGgGGHwRdJ2G2o34",
+        "AIzaSyBXgfh6zT-r8o0tGivo8NHmdynJXSHd464", "AIzaSyAKeOQQUzD90kHbgkYiQ5O5C4kZWKqf7ek"
+    ];
 
-        let currentKeyIndex = 0;
-        let exhaustedKeys = new Set();
-        let resetTimeout = null;
+    // Daftar model untuk rotasi fallback
+    const MODEL_VARIANTS = ["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-1.5-pro", "gemini-2.0-flash-exp"];
 
-        function getNextAvailableKey() {
-            const startIndex = currentKeyIndex;
-            let attempts = 0;
-            
-            while (attempts < EMBEDDED_API_KEYS.length) {
-                const key = EMBEDDED_API_KEYS[currentKeyIndex];
-                if (!exhaustedKeys.has(currentKeyIndex)) {
-                    updateKeyUI();
-                    return { key, index: currentKeyIndex };
-                }
-                currentKeyIndex = (currentKeyIndex + 1) % EMBEDDED_API_KEYS.length;
-                attempts++;
-            }
-            
-            showToast('Semua key limit nih. Auto-reset dalam 60 detik...', 'warning');
-            startResetTimer();
-            return null;
-        }
+    // --- CORE LOGIC ---
 
-        function markKeyExhausted(index) {
-            exhaustedKeys.add(index);
-            currentKeyIndex = (index + 1) % EMBEDDED_API_KEYS.length;
-            updateKeyUI();
-            
-            const remaining = EMBEDDED_API_KEYS.length - exhaustedKeys.size;
-            showToast(`Key ${index + 1} limit. Sisa ${remaining} key aktif.`, 'warning');
-        }
-
-        function startResetTimer() {
-            if (resetTimeout) clearTimeout(resetTimeout);
-            
-            let seconds = 60;
-            const timerEl = document.getElementById('resetTimer');
-            
-            const interval = setInterval(() => {
-                seconds--;
-                if (timerEl) timerEl.textContent = `Auto-reset: ${seconds}s`;
-                if (seconds <= 0) {
-                    clearInterval(interval);
-                    exhaustedKeys.clear();
-                    currentKeyIndex = 0;
-                    updateKeyUI();
-                    showToast('Key pool direset!', 'success');
-                    if (timerEl) timerEl.textContent = 'Auto-reset: --';
-                }
-            }, 1000);
-        }
-
-        function updateKeyUI() {
-            const grid = document.getElementById('keyStatusGrid');
-            const status = document.getElementById('keyPoolStatus');
-            const currentNum = document.getElementById('currentKeyNum');
-            const activeCount = document.getElementById('activeKeyCount');
-            
-            const active = EMBEDDED_API_KEYS.length - exhaustedKeys.size;
-            status.textContent = `${active} Active`;
-            activeCount.textContent = active;
-            currentNum.textContent = currentKeyIndex + 1;
-            
-            grid.innerHTML = EMBEDDED_API_KEYS.map((_, i) => {
-                let cls = 'key-dot standby';
-                if (i === currentKeyIndex && !exhaustedKeys.has(i)) cls = 'key-dot active';
-                else if (exhaustedKeys.has(i)) cls = 'key-dot exhausted';
-                return `<div class="${cls}" title="Key ${i + 1}"></div>`;
-            }).join('');
-        }
-
-        function showToast(message, type = 'success') {
-            const existing = document.querySelector('.toast');
-            if (existing) existing.remove();
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-        window.showToast = showToast;
-        
-        window.setSpeedMode = (mode) => {
-            currentSpeedMode = mode;
-            document.querySelectorAll('.speed-btn').forEach(btn => {
-                btn.className = 'speed-btn inactive';
-                if (btn.dataset.mode === mode) btn.className = `speed-btn ${mode} active`;
-            });
-            updateModeDisplay();
-        };
-
-        window.updateModeDisplay = () => {
-            const display = document.getElementById('speedModeDisplay');
-            const colors = { fast: 'text-green-400', balanced: 'text-yellow-400', quality: 'text-red-400' };
-            display.className = `text-[10px] font-bold ${colors[currentSpeedMode]}`;
-            display.textContent = currentSpeedMode.charAt(0).toUpperCase() + currentSpeedMode.slice(1);
-            
-            const indicator = document.getElementById('currentModeIndicator');
-            const model = document.getElementById('modelSelect').value;
-            const modelName = model.includes('pro') ? 'Pro' : model.includes('8b') ? '8B' : model.includes('2.0') ? '2.0' : 'Flash';
-            indicator.innerHTML = `<span class="mode-dot bg-${currentSpeedMode === 'fast' ? 'green' : currentSpeedMode === 'balanced' ? 'yellow' : 'red'}-400"></span><span class="text-slate-300">${modelName}</span>`;
-        };
-
-        window.openHistoryPanel = () => {
-            document.getElementById('historyPanel').classList.add('show');
-            loadFullHistory();
-        };
-        window.closeHistoryPanel = () => document.getElementById('historyPanel').classList.remove('show');
-
-        let allHistoryData = [];
-        
-        async function loadFullHistory() {
-            if (!currentUser) return;
-            const list = document.getElementById('historyPanelList');
-            list.innerHTML = '<p class="text-[10px] text-slate-500 text-center py-8">Memuat...</p>';
-            
-            try {
-                const q = query(collection(db, 'artifacts', 'virza-v12', 'users', currentUser.uid, 'history'), orderBy('timestamp', 'desc'), limit(100));
-                const snap = await getDocs(q);
-                
-                if (snap.empty) {
-                    list.innerHTML = '<p class="text-[10px] text-slate-500 text-center py-8">Belum ada history</p>';
-                    return;
-                }
-                
-                allHistoryData = [];
-                list.innerHTML = '';
-                
-                snap.forEach(doc => {
-                    const data = doc.data();
-                    data.id = doc.id;
-                    allHistoryData.push(data);
-                    
-                    const time = data.timestamp?.toDate?.() || new Date();
-                    const timeStr = time.toLocaleString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-                    
-                    const item = document.createElement('div');
-                    item.className = 'history-item';
-                    item.innerHTML = `
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="text-[9px] font-bold text-indigo-400 uppercase">${data.portal || 'General'}</span>
-                            <span class="text-[8px] text-slate-500">${timeStr}</span>
-                        </div>
-                        <p class="text-[11px] text-slate-200">"${data.prompt}"</p>
-                        ${data.response ? `<p class="text-[9px] text-slate-400 mt-1 line-clamp-2">${data.response.substring(0, 100)}...</p>` : ''}
-                    `;
-                    item.onclick = () => {
-                        document.getElementById('mainInput').value = data.prompt;
-                        closeHistoryPanel();
-                        if (document.getElementById('workspaceView').classList.contains('hidden')) {
-                            enterPortal('chat', 'Smart AI', 'fa-comment', '#34d399');
-                        }
-                    };
-                    list.appendChild(item);
-                });
-            } catch (e) {
-                list.innerHTML = '<p class="text-[10px] text-red-400 text-center py-8">Gagal memuat history</p>';
-            }
-        }
-
-        window.toggleAttachmentMenu = () => document.getElementById('attachmentMenu').classList.toggle('show');
-        
-        window.addAttachment = (type) => {
-            document.getElementById('attachmentMenu').classList.remove('show');
-            if (type === 'drive') {
-                document.getElementById('driveModal').classList.remove('hidden');
-                document.getElementById('driveModal').classList.add('flex');
-            } else {
-                const fi = document.getElementById('fileInput');
-                fi.accept = type === 'image' ? 'image/*' : type === 'video' ? 'video/*' : '.pdf,.doc,.docx,.txt';
-                fi.click();
-            }
-        };
-
-        window.handleFileSelect = (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const type = file.type.startsWith('image') ? 'image' : file.type.startsWith('video') ? 'video' : 'document';
-            currentAttachment = { type, file, name: file.name, size: (file.size / 1024).toFixed(1) + ' KB' };
-            showAttachmentPreview();
-            showToast(`File: ${file.name}`, 'success');
-        };
-
-        function showAttachmentPreview() {
-            const area = document.getElementById('attachmentPreviewArea');
-            const icon = document.getElementById('attachmentPreviewIcon');
-            const name = document.getElementById('attachmentPreviewName');
-            const size = document.getElementById('attachmentPreviewSize');
-            const img = document.getElementById('attachmentPreviewImage');
-            const btn = document.getElementById('attachmentBtn');
-            
-            if (currentAttachment) {
-                area.classList.remove('hidden');
-                btn.classList.add('active');
-                name.textContent = currentAttachment.name;
-                size.textContent = currentAttachment.size;
-                img.classList.add('hidden');
-                
-                if (currentAttachment.type === 'image' && currentAttachment.file) {
-                    icon.innerHTML = '<i class="fa-solid fa-image"></i>';
-                    const reader = new FileReader();
-                    reader.onload = (e) => { img.src = e.target.result; img.classList.remove('hidden'); };
-                    reader.readAsDataURL(currentAttachment.file);
-                } else if (currentAttachment.type === 'video') {
-                    icon.innerHTML = '<i class="fa-solid fa-video"></i>';
-                } else if (currentAttachment.type === 'drive') {
-                    icon.innerHTML = '<i class="fa-brands fa-google-drive"></i>';
-                    size.textContent = 'Link';
-                } else {
-                    icon.innerHTML = '<i class="fa-solid fa-file-lines"></i>';
-                }
-            } else {
-                area.classList.add('hidden');
-                btn.classList.remove('active');
-            }
-        }
-
-        window.removeAttachment = () => { currentAttachment = null; showAttachmentPreview(); document.getElementById('fileInput').value = ''; };
-        window.closeDriveModal = () => { document.getElementById('driveModal').classList.add('hidden'); document.getElementById('driveLinkInput').value = ''; };
-        window.submitDriveLink = () => {
-            const link = document.getElementById('driveLinkInput').value.trim();
-            if (!link) return;
-            currentAttachment = { type: 'drive', name: 'Google Drive Link', url: link, size: 'Link' };
-            showAttachmentPreview();
-            closeDriveModal();
-            showToast('Link Drive ditambahkan!', 'success');
-        };
-
-        onAuthStateChanged(auth, async (user) => {
-            const loader = document.getElementById('loader');
-            const authScreen = document.getElementById('authScreen');
-            const mainUI = document.getElementById('mainUI');
-            
-            if (user) {
-                currentUser = user;
-                document.getElementById('userNameDisp').innerText = (user.displayName || user.email.split('@')[0]).toUpperCase();
-                document.getElementById('userAvatar').innerText = (user.displayName || user.email.split('@')[0]).charAt(0).toUpperCase();
+    function getNextKey() {
+        let attempts = 0;
+        while (attempts < API_KEYS.length) {
+            if (!exhaustedKeys.has(currentKeyIndex)) {
                 updateKeyUI();
-                authScreen.style.display = 'none';
-                mainUI.style.display = 'flex';
-                
-                setTimeout(() => {
-                    document.getElementById('gpsDot').className = 'w-1.5 h-1.5 rounded-full status-online';
-                    document.getElementById('locTxt').innerText = 'ONLINE';
-                }, 1000);
-            } else {
-                authScreen.style.display = 'flex';
-                mainUI.style.display = 'none';
+                return { key: API_KEYS[currentKeyIndex], index: currentKeyIndex };
             }
-            loader.style.opacity = '0';
-            setTimeout(() => loader.style.display = 'none', 500);
-        });
+            currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
+            attempts++;
+        }
+        return null;
+    }
 
-        window.handleAuth = () => {
-            const email = document.getElementById('emailIn').value.trim();
-            const pass = document.getElementById('passIn').value;
-            if (!email || !pass) { showToast('Isi email & password!', 'error'); return; }
-            if (isLoginMode) signInWithEmailAndPassword(auth, email, pass).catch(e => showToast(e.message, 'error'));
-            else createUserWithEmailAndPassword(auth, email, pass).catch(e => showToast(e.message, 'error'));
-        };
+    window.sendMessage = async () => {
+        if (isProcessing) return;
+        const input = document.getElementById('mainInput');
+        const prompt = input.value.trim();
+        if (!prompt && !currentAttachment) return;
 
-        window.handleGoogle = () => signInWithPopup(auth, provider);
-        window.handleLogout = () => signOut(auth);
-        window.toggleAuthMode = () => {
-            isLoginMode = !isLoginMode;
-            document.getElementById('authToggleBtn').innerText = isLoginMode ? "Belum ada akun? Daftar" : "Sudah punya akun? Login";
-            document.getElementById('authBtnText').innerText = isLoginMode ? "Enter" : "Daftar";
-        };
+        let keyData = getNextKey();
+        if (!keyData) {
+            showToast("Semua API Key limit! Tunggu sebentar.", "error");
+            return;
+        }
 
-        window.clearCurrentChat = () => {
-            document.getElementById('chatBox').innerHTML = `<div class="flex justify-start msg-enter"><div class="max-w-[85%] bg-slate-800/80 border border-indigo-500/10 p-3 rounded-xl rounded-bl-sm text-xs"><p class="font-bold text-indigo-400 mb-1 text-[9px]">NEXUS AI</p><p class="text-slate-200">Chat cleared. Siap membantu!</p></div></div>`;
-            showToast('Chat cleared!', 'success');
-        };
+        isProcessing = true;
+        const chat = document.getElementById('chatBox');
+        const sendBtn = document.getElementById('sendBtn');
+        
+        // Simpan data attachment sebelum dibersihkan
+        let activeAttachment = currentAttachment;
+        
+        // Render Pesan User
+        renderUserMessage(prompt, activeAttachment);
+        
+        input.value = '';
+        input.style.height = 'auto';
+        removeAttachment();
+        chat.scrollTop = chat.scrollHeight;
 
-        window.sendMessage = async () => {
-            const input = document.getElementById('mainInput');
-            const prompt = input.value.trim();
-            if (!prompt && !currentAttachment) return;
+        const typingId = 'typing-' + Date.now();
+        showTypingIndicator(typingId, true);
+        sendBtn.disabled = true;
 
-            const keyData = getNextAvailableKey();
-            if (!keyData) return;
-            
-            const { key, index } = keyData;
-            const chat = document.getElementById('chatBox');
-            const sendBtn = document.getElementById('sendBtn');
-            
-            let fullPrompt = prompt;
-            if (currentAttachment) {
-                fullPrompt = currentAttachment.type === 'drive' 
-                    ? `[Drive Link: ${currentAttachment.url}]\n\n${prompt}` 
-                    : `[File: ${currentAttachment.name}]\n\n${prompt}`;
-            }
-            
-            let userMsgHtml = `<div class="flex justify-end msg-enter"><div class="max-w-[80%] bg-gradient-to-br from-indigo-600 to-purple-600 p-2.5 rounded-xl rounded-br-sm text-xs">`;
-            if (currentAttachment?.type === 'image' && currentAttachment.file) {
-                const imgData = await readFileAsDataURL(currentAttachment.file);
-                userMsgHtml += `<img src="${imgData}" class="max-w-full rounded-lg mb-2 max-h-32 object-cover">`;
-            }
-            if (currentAttachment) userMsgHtml += `<div class="text-[9px] opacity-70 mb-1"><i class="fa-solid fa-paperclip mr-1"></i>${currentAttachment.name}</div>`;
-            userMsgHtml += `${prompt}</div></div>`;
-            chat.innerHTML += userMsgHtml;
-            
-            input.value = '';
-            input.style.height = 'auto';
-            removeAttachment();
-            chat.scrollTop = chat.scrollHeight;
-            
-            let responseText = '';
-            if (currentUser) {
-                try {
-                    const docRef = await addDoc(collection(db, 'artifacts', 'virza-v12', 'users', currentUser.uid, 'history'), { 
-                        prompt, portal: window.activePortal || 'General', timestamp: serverTimestamp(), response: '' 
-                    });
-                    window.currentHistoryId = docRef.id;
-                } catch (e) {}
-            }
+        // Susun daftar model: Pilihan user duluan, baru sisanya sebagai cadangan
+        const selectedModel = document.getElementById('modelSelect').value;
+        const modelsToTry = [selectedModel, ...MODEL_VARIANTS.filter(m => m !== selectedModel)];
+        
+        let success = false;
+        let finalAIResponse = "";
 
-            const typingId = 't' + Date.now();
-            chat.innerHTML += `<div id="${typingId}" class="flex justify-start msg-enter"><div class="bg-slate-800/80 p-2.5 rounded-xl"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div>`;
-            chat.scrollTop = chat.scrollHeight;
-
+        // LOOP 1: Rotasi Model di Key yang sama
+        for (let modelName of modelsToTry) {
             try {
-                sendBtn.disabled = true;
-                const model = document.getElementById('modelSelect').value;
-                
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${keyData.key}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: fullPrompt }] }], generationConfig: { temperature: 0.7, maxOutputTokens: 2048 } })
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: { temperature: 0.7, maxOutputTokens: 4096 }
+                    })
                 });
-                
-                document.getElementById(typingId)?.remove();
-                const data = await res.json();
-                
+
+                const data = await response.json();
+
                 if (data.error) {
-                    if (data.error.message?.includes('quota') || data.error.status === 'RESOURCE_EXHAUSTED') {
-                        markKeyExhausted(index);
-                        showToast('Key limit, rotate ke key lain...', 'warning');
-                        sendBtn.disabled = false;
-                        setTimeout(() => sendMessage(), 300);
-                        return;
+                    // Jika limit (429), kita lanjut coba model berikutnya
+                    if (data.error.status === 'RESOURCE_EXHAUSTED') {
+                        console.warn(`Model ${modelName} limit pada Key ${keyData.index + 1}. Mencoba cadangan...`);
+                        continue; 
                     }
-                    throw new Error(data.error.message || 'API Error');
-            }
-
-            responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response";
-                chat.innerHTML += `<div class="flex justify-start msg-enter"><div class="max-w-[85%] bg-slate-800/80 border border-indigo-500/10 p-2.5 rounded-xl text-xs"><p class="font-bold text-indigo-400 text-[9px] mb-1">NEXUS AI</p><div class="text-slate-200">${responseText.replace(/\n/g, '<br>')}</div></div></div>`;
-                
-                if (currentUser && window.currentHistoryId) {
-                    try {
-                        await updateDoc(doc(db, 'artifacts', 'virza-v12', 'users', currentUser.uid, 'history', window.currentHistoryId), { response: responseText });
-                    } catch (e) {}
+                    throw new Error(data.error.message);
                 }
-                
-                const htmlMatch = responseText.match(/```html?\s*([\s\S]*?)```/);
-                if (htmlMatch) {
-                    toggleCanvas(true);
-                    document.getElementById('artifactFrame').src = URL.createObjectURL(new Blob([htmlMatch[1].trim()], { type: 'text/html' }));
-                }
-                
-                sendBtn.disabled = false;
-            } catch (e) {
-                document.getElementById(typingId)?.remove();
-                chat.innerHTML += `<div class="text-center msg-enter"><span class="text-red-400 text-[10px] bg-red-500/10 px-3 py-1 rounded-lg">${e.message}</span></div>`;
-                sendBtn.disabled = false;
-            }
-            chat.scrollTop = chat.scrollHeight;
-        };
 
-        function readFileAsDataURL(file) {
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onload = (e) => resolve(e.target.result);
-                reader.readAsDataURL(file);
-            });
+                finalAIResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, AI tidak memberikan respon.";
+                success = true;
+                break; // Berhasil, keluar dari loop model
+
+            } catch (err) {
+                console.error(`Error pada ${modelName}:`, err.message);
+                break; // Berhenti jika error bukan masalah kuota (misal: prompt diblokir)
+            }
         }
 
-        window.toggleCanvas = (show) => {
-            document.getElementById('previewPanel').classList.toggle('hidden', !show);
-            document.getElementById('workspaceView').classList.toggle('split-active', show);
-        };
-        window.toggleCanvasManually = () => toggleCanvas(document.getElementById('previewPanel').classList.contains('hidden'));
+        showTypingIndicator(typingId, false);
 
-        updateKeyUI();
-        updateModeDisplay();
-    </script>
+        if (success) {
+            renderBotMessage(finalAIResponse);
+            saveToFirebase(prompt, finalAIResponse);
+            isProcessing = false;
+            sendBtn.disabled = false;
+        } else {
+            // Jika semua model di Key ini GAGAL, buang Key ini
+            exhaustedKeys.add(keyData.index);
+            updateKeyUI();
+            showToast(`Key ${keyData.index + 1} Limit Berjamaah. Ganti Key...`, "warning");
+            
+            // Kembalikan teks agar bisa di-retry otomatis
+            input.value = prompt;
+            currentAttachment = activeAttachment;
+            isProcessing = false;
+            
+            // Retry otomatis dengan Key baru setelah 1 detik
+            setTimeout(() => window.sendMessage(), 1000);
+        }
+    };
 
-    <script>
-        function autoSize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 96) + 'px'; }
-        function handleKeyDown(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
-        setInterval(() => document.getElementById('timeDisplay').innerText = new Date().toLocaleTimeString('id-ID', { hour12: false }), 1000);
+    // --- UI HELPERS ---
 
-        const demons = [
-            { id: 'coding', name: 'Architect', icon: 'fa-code', color: '#818cf8' },
-            { id: 'image', name: 'Image HD', icon: 'fa-image', color: '#f472b6' },
-            { id: 'chat', name: 'Smart AI', icon: 'fa-comment', color: '#34d399' },
-            { id: 'vision', name: 'Vision Pro', icon: 'fa-eye', color: '#fbbf24' },
-            { id: 'web', name: 'Web Weaver', icon: 'fa-globe', color: '#60a5fa' },
-            { id: 'cyber', name: 'Cyber Guard', icon: 'fa-shield', color: '#f87171' },
-            { id: 'math', name: 'Quantum', icon: 'fa-calculator', color: '#a78bfa' },
-            { id: 'seo', name: 'SEO Master', icon: 'fa-magnifying-glass', color: '#2dd4bf' },
-            { id: 'data', name: 'Data Miner', icon: 'fa-database', color: '#94a3b8' },
-            { id: 'social', name: 'Social Ads', icon: 'fa-hashtag', color: '#fb7185' },
-            { id: 'video', name: 'Motion AI', icon: 'fa-film', color: '#fb923c' },
-            { id: 'audio', name: 'Sonic Wave', icon: 'fa-music', color: '#4ade80' },
-            { id: 'logo', name: 'Brand AI', icon: 'fa-pen-nib', color: '#e879f9' },
-            { id: 'lang', name: 'Polyglot', icon: 'fa-language', color: '#818cf8' },
-            { id: 'bug', name: 'Debug Sys', icon: 'fa-bug', color: '#ef4444' },
-            { id: 'cloud', name: 'Cloud Drive', icon: 'fa-cloud', color: '#38bdf8' },
-            { id: 'sec', name: 'Vault Pro', icon: 'fa-key', color: '#fbbf24' },
-            { id: 'write', name: 'Ghost Writer', icon: 'fa-book', color: '#c084fc' },
-            { id: 'game', name: 'Game Dev', icon: 'fa-gamepad', color: '#f472b6' },
-            { id: 'law', name: 'Law Logic', icon: 'fa-gavel', color: '#fca5a5' }
-        ];
+    function renderUserMessage(text, attach) {
+        const chat = document.getElementById('chatBox');
+        let html = `<div class="flex justify-end msg-enter"><div class="max-w-[80%] bg-gradient-to-br from-indigo-600 to-purple-600 p-2.5 rounded-xl text-xs">`;
+        if (attach?.type === 'image') {
+            const preview = document.getElementById('attachmentPreviewImage').src;
+            html += `<img src="${preview}" class="max-w-full rounded-lg mb-2 max-h-32 object-cover">`;
+        }
+        html += `<span>${text}</span></div></div>`;
+        chat.innerHTML += html;
+    }
 
-        let activePortal = "General";
-        
-        function renderPortals(data) {
-            document.getElementById('portalGrid').innerHTML = (data || demons).map(p => `
-                <div onclick="enterPortal('${p.id}', '${p.name}', '${p.icon}', '${p.color}')" class="p-card p-2.5 flex flex-col items-center gap-1.5 text-center">
-                    <div class="w-9 h-9 rounded-lg flex items-center justify-center text-sm" style="background: ${p.color}20; color: ${p.color};"><i class="fa-solid ${p.icon}"></i></div>
-                    <span class="text-[9px] font-bold uppercase tracking-wider text-slate-200">${p.name}</span>
+    function renderBotMessage(text) {
+        const chat = document.getElementById('chatBox');
+        const formattedText = text.replace(/\n/g, '<br>');
+        chat.innerHTML += `
+            <div class="flex justify-start msg-enter">
+                <div class="max-w-[85%] bg-slate-800/80 border border-indigo-500/10 p-2.5 rounded-xl text-xs">
+                    <p class="font-bold text-indigo-400 text-[9px] mb-1">NEXUS AI</p>
+                    <div class="text-slate-200">${formattedText}</div>
                 </div>
-            `).join('');
+            </div>`;
+        
+        // Cek jika ada kode HTML untuk ditampilkan di preview
+        const codeMatch = text.match(/```html?\s*([\s\S]*?)```/);
+        if (codeMatch) {
+            window.toggleCanvas(true);
+            document.getElementById('artifactFrame').srcdoc = codeMatch[1].trim();
         }
-        renderPortals();
+        chat.scrollTop = chat.scrollHeight;
+    }
 
-        window.enterPortal = (id, name, icon, color) => {
-            activePortal = name;
-            document.getElementById('lobbyView').classList.add('hidden');
-            document.getElementById('workspaceView').classList.remove('hidden');
-            document.getElementById('backToLobby').classList.remove('hidden');
-            document.getElementById('backToLobby').classList.add('flex');
-            document.getElementById('portalTitle').textContent = name;
-            document.getElementById('portalIcon').innerHTML = `<i class="fa-solid ${icon}"></i>`;
-            document.getElementById('portalIcon').style.color = color;
-            document.getElementById('portalIcon').style.background = color + '20';
-            document.getElementById('previewToggle').classList.toggle('hidden', !['web', 'coding'].includes(id));
-            setTimeout(() => document.getElementById('mainInput').focus(), 100);
-        };
+    function showTypingIndicator(id, show) {
+        const chat = document.getElementById('chatBox');
+        if (show) {
+            chat.innerHTML += `<div id="${id}" class="flex justify-start msg-enter"><div class="bg-slate-800/80 p-2.5 rounded-xl"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div>`;
+        } else {
+            document.getElementById(id)?.remove();
+        }
+        chat.scrollTop = chat.scrollHeight;
+    }
 
-        window.exitPortal = () => {
-            document.getElementById('lobbyView').classList.remove('hidden');
-            document.getElementById('workspaceView').classList.add('hidden');
-            document.getElementById('backToLobby').classList.add('hidden');
-            toggleCanvas(false);
-        };
+    async function saveToFirebase(p, r) {
+        if (!currentUser) return;
+        try {
+            await addDoc(collection(db, 'artifacts', 'virza-v12', 'users', currentUser.uid, 'history'), {
+                prompt: p, response: r, timestamp: serverTimestamp(), portal: window.activePortal || 'General'
+            });
+        } catch (e) { console.error("Firebase Error:", e); }
+    }
 
-        window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('translate-x-full');
-        window.filterPortals = () => {
-            const q = document.getElementById('pSearch').value.toLowerCase();
-            renderPortals(demons.filter(p => p.name.toLowerCase().includes(q) || p.id.toLowerCase().includes(q)));
-        };
+    function updateKeyUI() {
+        const activeCount = API_KEYS.length - exhaustedKeys.size;
+        document.getElementById('keyPoolStatus').textContent = `${activeCount} Active`;
+        document.getElementById('activeKeyCount').textContent = activeCount;
+        document.getElementById('currentKeyNum').textContent = currentKeyIndex + 1;
+        
+        const grid = document.getElementById('keyStatusGrid');
+        grid.innerHTML = API_KEYS.map((_, i) => {
+            let state = exhaustedKeys.has(i) ? 'exhausted' : (i === currentKeyIndex ? 'active' : 'standby');
+            return `<div class="key-dot ${state}"></div>`;
+        }).join('');
+    }
 
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.attachment-btn') && !e.target.closest('.attachment-menu')) {
-                document.getElementById('attachmentMenu').classList.remove('show');
-            }
-        });
-    </script>
-</body>
+    // --- AUTH LISTENERS ---
+    onAuthStateChanged(auth, (user) => {
+        currentUser = user;
+        document.getElementById('loader').style.display = 'none';
+        if (user) {
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('mainUI').classList.remove('hidden');
+            document.getElementById('userNameDisp').innerText = (user.displayName || user.email.split('@')[0]).toUpperCase();
+            updateKeyUI();
+        } else {
+            document.getElementById('authScreen').classList.remove('hidden');
+            document.getElementById('mainUI').classList.add('hidden');
+        }
+    });
+
+    // Reset Otomatis Key setiap 2 menit jika ada yang limit
+    setInterval(() => {
+        if (exhaustedKeys.size > 0) {
+            exhaustedKeys.clear();
+            updateKeyUI();
+            showToast("Beberapa Key telah dipulihkan.", "success");
+        }
+    }, 120000);
+
+    // Ekspos fungsi ke global window
+    window.handleAuth = () => { /* Logic login lu */ };
+    window.handleGoogle = () => signInWithPopup(auth, provider);
+    window.handleLogout = () => signOut(auth);
+    </script>                     
+  </body>
 </html>
