@@ -1,418 +1,511 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Virza Nexus</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIRZA NEXUS </title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide-react/0.263.1/lucide-react.min.js"></script>
     <style>
-        :root { 
-            --accent: #6366f1; 
-            --bg-deep: #0f172a; 
-            --bg-light: #1e293b;
-        }
-        
-        body { 
-            background: radial-gradient(circle at top right, var(--bg-light), var(--bg-deep)); 
-            color: #f1f5f9; 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            overflow: hidden;
-            height: 100vh;
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+
+        :root {
+            --accent-glow: rgba(99, 102, 241, 0.5);
+            --bg-dark: #0a0b14;
+            --card-bg: #161827;
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
         }
 
-        .glass-bright { 
-            background: rgba(30, 41, 59, 0.7); 
-            backdrop-filter: blur(12px); 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: #e2e8f0;
+            margin: 0;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .portal-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.75rem;
-        }
-        @media (min-width: 640px) { .portal-grid { grid-template-columns: repeat(3, 1fr); } }
-        @media (min-width: 768px) { .portal-grid { grid-template-columns: repeat(4, 1fr); } }
-        @media (min-width: 1024px) { .portal-grid { grid-template-columns: repeat(5, 1fr); } }
+        /* Responsive Fix for iOS Safe Areas */
+        .safe-area-top { padding-top: env(safe-area-inset-top); }
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
 
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        
-        .p-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 1.25rem;
-            cursor: pointer;
-        }
-        .p-card:hover { 
-            background: rgba(99, 102, 241, 0.1); 
-            border-color: var(--accent);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.4);
-        }
-        .p-card:active { transform: scale(0.95); }
-
-        .msg-pop { animation: msgPop 0.3s ease-out; }
-        @keyframes msgPop { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        @media (max-width: 1023px) {
-            .main-layout.split-active { flex-direction: column; }
-            .main-layout.split-active .chat-panel { height: 60%; }
-            .main-layout.split-active .preview-panel { height: 40%; width: 100%; border-top: 1px solid rgba(255, 255, 255, 0.1); }
-        }
-        @media (min-width: 1024px) {
-            .main-layout.split-active { flex-direction: row; }
-            .chat-panel { flex: 1; }
-            .preview-panel { width: 50%; border-left: 1px solid rgba(255, 255, 255, 0.1); }
+        .glass-card {
+            background: rgba(30, 32, 50, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
         }
 
-        header { padding-top: env(safe-area-inset-top); }
-        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+        .active-glow {
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+
+        .typing-cursor::after {
+            content: "|";
+            animation: blink 1s infinite;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* Animation for portal transition */
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Mobile specific layout fixes */
+        @media (max-width: 768px) {
+            .grid-cols-custom { grid-template-columns: repeat(2, 1fr); }
+            .chat-container { height: calc(100vh - 180px); }
+        }
     </style>
 </head>
-<body class="safe-bottom">
+<body class="min-h-screen flex flex-col">
 
-    <div id="loader" class="fixed inset-0 z-[3000] bg-slate-950 flex items-center justify-center transition-opacity duration-500">
-        <div class="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
-    </div>
-
-    <div id="authScreen" class="fixed inset-0 z-[2000] bg-slate-900 flex items-center justify-center p-6 hidden">
-        <div class="w-full max-w-sm glass-bright p-8 rounded-[2.5rem] text-center border-indigo-500/30">
-            <h1 class="text-3xl font-black italic mb-2 tracking-tighter">NEXUS <span class="text-indigo-400">DAFTAR</span></h1>
-            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-[0.4em] mb-8">Login Protocol Required</p>
-            <div id="authContent" class="space-y-4">
-                <input type="email" id="emailIn" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-indigo-500" placeholder="Email Address">
-                <input type="password" id="passIn" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-indigo-500" placeholder="Security Pin">
-                <button onclick="handleAuth()" class="w-full py-4 bg-indigo-600 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-indigo-500/30">Enter Dimension</button>
+    <!-- App Container -->
+    <div id="app" class="flex flex-col flex-1 h-screen overflow-hidden relative">
+        
+        <!-- HEADER -->
+        <header class="safe-area-top p-4 flex justify-between items-center z-50">
+            <div class="flex flex-col">
+                <h1 class="text-2xl font-extrabold tracking-tighter italic text-white flex items-center gap-2">
+                    VIRZA NEXUS <span class="text-indigo-500">V12</span>
+                </h1>
+                <p id="status-text" class="text-[10px] uppercase tracking-widest text-indigo-400 font-bold flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse"></span>
+                    Cloud Database Active
+                </p>
             </div>
-            <button onclick="handleGoogle()" class="w-full mt-4 py-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-wider">
-                <img src="https://www.gstatic.com/images/branding/product/1x/googleg_48dp.png" class="w-4 h-4"> Google Link
-            </button>
-            <button id="authToggleBtn" onclick="toggleAuthMode()" class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-6 block mx-auto">Daftar Akun Baru</button>
-        </div>
-    </div>
-
-    <div id="mainUI" class="flex flex-col h-full hidden">
-        <header class="h-20 glass-bright flex items-center justify-between px-6 z-50">
             <div class="flex items-center gap-3">
-                <button id="backToLobby" onclick="exitPortal()" class="hidden w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
-                    <i class="fa-solid fa-chevron-left text-xs"></i>
+                <button onclick="toggleHistory()" class="p-2.5 rounded-2xl glass-card text-white hover:bg-indigo-600 transition-all">
+                    <i data-lucide="history" class="w-5 h-5"></i>
                 </button>
-                <div class="flex flex-col">
-                    <div class="flex items-center gap-1.5">
-                        <span id="gpsDot" class="w-2 h-2 rounded-full bg-red-500"></span>
-                        <span id="locTxt" class="text-[8px] font-black text-slate-500 uppercase tracking-widest italic">OFFLINE</span>
-                    </div>
-                    <span id="timeDisplay" class="text-lg font-black italic tracking-tighter">00:00:00</span>
-                </div>
-            </div>
-            <div class="flex items-center gap-3">
-                <div onclick="toggleSidebar()" class="w-10 h-10 rounded-full bg-indigo-600 border-2 border-white/20 flex items-center justify-center font-black text-xs cursor-pointer shadow-lg shadow-indigo-500/20" id="userAvatar">?</div>
-                <button onclick="toggleSidebar()" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400">
-                    <i class="fa-solid fa-sliders"></i>
+                <button onclick="toggleSettings()" class="p-2.5 rounded-2xl glass-card text-white hover:bg-indigo-600 transition-all">
+                    <i data-lucide="settings-2" class="w-5 h-5"></i>
                 </button>
             </div>
         </header>
 
-        <main class="flex-1 overflow-hidden relative">
-            <div id="lobbyView" class="absolute inset-0 overflow-y-auto p-6 no-scrollbar">
-                <div class="max-w-6xl mx-auto py-6">
-                    <div class="mb-8">
-                        <h2 class="text-3xl font-black italic tracking-tighter uppercase leading-tight">Commander, <br><span id="userNameDisp" class="text-indigo-500 text-4xl">GUEST</span></h2>
-                        <p class="text-[9px] font-bold text-slate-500 uppercase tracking-[0.4em] mt-1">Select Active tools</p>
+        <!-- MAIN VIEW (DYNAMIC) -->
+        <main id="main-content" class="flex-1 overflow-y-auto px-4 pb-24 fade-in">
+            <!-- Home View -->
+            <div id="view-home">
+                <!-- Lockscreen/Welcome Banner -->
+                <div class="mt-4 mb-8 glass-card p-6 flex items-center justify-between border-l-4 border-indigo-500">
+                    <div>
+                        <p id="current-date" class="text-xs font-bold text-indigo-300 uppercase mb-1">RABU, 18 FEB 2026</p>
+                        <h2 id="current-time" class="text-4xl font-black italic">11.38.25</h2>
+                        <p class="text-sm mt-2 opacity-70">Hi, <span class="text-white font-bold">MANTUSI ROBOTIK</span></p>
                     </div>
+                    <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center text-xl font-bold border-2 border-white/20 active-glow">
+                        M
+                    </div>
+                </div>
 
-                    <div class="relative mb-8">
-                        <i class="fa-solid fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-600"></i>
-                        <input type="text" id="pSearch" oninput="filterPortals()" class="w-full bg-white/5 border border-white/10 p-4 pl-12 rounded-2xl outline-none focus:border-indigo-500 transition text-sm" placeholder="Search 20 Dimensions...">
-                    </div>
+                <!-- Search Bar -->
+                <div class="relative mb-8">
+                    <input type="text" placeholder="Pencarian Dimensi Utama..." class="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all">
+                    <i data-lucide="search" class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
 
-                    <div id="portalGrid" class="portal-grid pb-24">
-                    </div>
+                <!-- Portal Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10">
+                    <button onclick="openPortal('architect')" class="glass-card p-6 flex flex-col items-center gap-3 hover:scale-[1.02] transition-transform group">
+                        <div class="w-14 h-14 rounded-2xl bg-indigo-500/20 flex items-center justify-center group-hover:bg-indigo-500/40">
+                            <i data-lucide="code-2" class="w-7 h-7 text-indigo-400"></i>
+                        </div>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Architect</span>
+                    </button>
+
+                    <button onclick="openPortal('image')" class="glass-card p-6 flex flex-col items-center gap-3 hover:scale-[1.02] transition-transform group">
+                        <div class="w-14 h-14 rounded-2xl bg-pink-500/20 flex items-center justify-center group-hover:bg-pink-500/40">
+                            <i data-lucide="image" class="w-7 h-7 text-pink-400"></i>
+                        </div>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Image HD</span>
+                    </button>
+
+                    <button onclick="openPortal('chat')" class="glass-card p-6 flex flex-col items-center gap-3 hover:scale-[1.02] transition-transform group border-2 border-indigo-500/50 active-glow">
+                        <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 flex items-center justify-center group-hover:bg-emerald-500/40">
+                            <i data-lucide="message-square" class="w-7 h-7 text-emerald-400"></i>
+                        </div>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-white">Smart AI</span>
+                    </button>
+
+                    <button onclick="openPortal('vision')" class="glass-card p-6 flex flex-col items-center gap-3 hover:scale-[1.02] transition-transform group">
+                        <div class="w-14 h-14 rounded-2xl bg-amber-500/20 flex items-center justify-center group-hover:bg-amber-500/40">
+                            <i data-lucide="eye" class="w-7 h-7 text-amber-400"></i>
+                        </div>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Vision Pro</span>
+                    </button>
+
+                    <button onclick="openPortal('weaver')" class="glass-card p-6 flex flex-col items-center gap-3 hover:scale-[1.02] transition-transform group">
+                        <div class="w-14 h-14 rounded-2xl bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/40">
+                            <i data-lucide="globe" class="w-7 h-7 text-blue-400"></i>
+                        </div>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Web Weaver</span>
+                    </button>
+
+                    <button class="glass-card p-6 flex flex-col items-center gap-3 opacity-50">
+                        <div class="w-14 h-14 rounded-2xl bg-red-500/20 flex items-center justify-center">
+                            <i data-lucide="shield" class="w-7 h-7 text-red-400"></i>
+                        </div>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Nexus Guard</span>
+                    </button>
+                </div>
+
+                <div class="flex justify-center mb-10">
+                    <button class="bg-red-950/40 border border-red-500/30 text-red-500 px-6 py-3 rounded-2xl text-[10px] font-black tracking-widest uppercase flex items-center gap-2">
+                        <i data-lucide="power" class="w-4 h-4"></i> Terminasi Protokol
+                    </button>
                 </div>
             </div>
 
-            <div id="workspaceView" class="hidden absolute inset-0 flex flex-col lg:flex-row main-layout">
-                <div class="chat-panel flex flex-col h-full bg-slate-900/40">
-                    <div id="chatBox" class="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar">
-                        <div class="flex justify-start">
-                            <div class="max-w-[85%] bg-white/5 border border-white/5 p-4 rounded-2xl rounded-bl-none text-xs leading-relaxed text-slate-300">
-                                <p class="font-bold text-indigo-400 mb-1 uppercase tracking-widest text-[10px]">Portal System:</p>
-                                <span id="welcomeMsg">Siap menerima request.</span>
-                            </div>
-                        </div>
+            <!-- Portal View (Architect/Chat/etc) -->
+            <div id="view-portal" class="hidden h-full flex flex-col">
+                <div class="flex items-center gap-3 mb-6">
+                    <button onclick="goHome()" class="p-2 rounded-xl bg-white/5 hover:bg-white/10">
+                        <i data-lucide="arrow-left" class="w-5 h-5 text-indigo-400"></i>
+                    </button>
+                    <h2 id="portal-title" class="text-xl font-bold italic uppercase tracking-tighter text-white">PORTAL AI</h2>
+                </div>
+
+                <!-- Dual View (For Website) -->
+                <div id="dual-view-container" class="hidden flex-1 flex flex-col md:flex-row gap-4 mb-4 h-[500px]">
+                    <div class="flex-1 glass-card overflow-hidden flex flex-col">
+                        <div class="p-2 border-b border-white/5 bg-white/5 text-[10px] font-bold uppercase tracking-widest">Neural Code</div>
+                        <textarea id="neural-editor" class="flex-1 bg-transparent p-4 font-mono text-sm outline-none resize-none" placeholder="HTML/CSS logic..."></textarea>
                     </div>
-                    
-                    <div class="p-4 bg-slate-900/60 backdrop-blur-xl border-t border-white/10">
-                        <div class="max-w-4xl mx-auto flex items-center gap-3">
-                            <textarea id="mainInput" class="flex-1 bg-white/5 border border-white/10 rounded-2xl p-4 text-sm outline-none resize-none no-scrollbar max-h-32 focus:border-indigo-500" placeholder="Type instructions..." rows="1" oninput="autoSize(this)"></textarea>
-                            <button id="sendBtn" onclick="sendMessage()" class="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/30 active:scale-90 transition disabled:opacity-50">
-                                <i class="fa-solid fa-paper-plane text-xs"></i>
-                            </button>
-                        </div>
+                    <div class="flex-1 glass-card overflow-hidden flex flex-col bg-white">
+                        <div class="p-2 border-b border-black/5 bg-black/5 text-[10px] font-bold uppercase tracking-widest text-black">Live Preview</div>
+                        <iframe id="live-preview" class="flex-1 w-full border-none"></iframe>
                     </div>
                 </div>
 
-                <div id="previewPanel" class="hidden preview-panel bg-black/40 p-2">
-                    <div class="h-full rounded-3xl overflow-hidden bg-white shadow-2xl relative">
-                        <div class="absolute top-4 right-4 z-10">
-                            <button onclick="toggleCanvas(false)" class="w-10 h-10 rounded-full bg-black/60 text-white backdrop-blur-md flex items-center justify-center shadow-xl"><i class="fa-solid fa-xmark"></i></button>
+                <!-- Chat Display -->
+                <div id="chat-messages" class="flex-1 overflow-y-auto space-y-4 mb-4 pr-2">
+                    <div class="flex flex-col gap-1 max-w-[80%]">
+                        <div class="p-4 rounded-2xl rounded-tl-none glass-card text-sm leading-relaxed">
+                            Sistem diaktifkan. Berikan instruksi neural Anda untuk inisialisasi dimensi.
                         </div>
-                        <iframe id="artifactFrame" class="w-full h-full border-none"></iframe>
+                        <span class="text-[9px] text-indigo-400 ml-1">SYSTEM 11:38</span>
+                    </div>
+                </div>
+
+                <!-- Chat Input Area -->
+                <div class="safe-area-bottom pb-4">
+                    <div class="glass-card p-2 flex flex-col gap-2 shadow-2xl">
+                        <div id="attachment-preview" class="hidden flex gap-2 p-2 border-b border-white/10"></div>
+                        <div class="flex items-end gap-2">
+                            <div class="flex gap-1 pb-1">
+                                <button onclick="triggerFile('image')" class="p-2 text-gray-400 hover:text-indigo-400"><i data-lucide="image" class="w-5 h-5"></i></button>
+                                <button onclick="triggerFile('file')" class="p-2 text-gray-400 hover:text-indigo-400"><i data-lucide="paperclip" class="w-5 h-5"></i></button>
+                            </div>
+                            <textarea id="neural-input" rows="1" class="flex-1 bg-transparent py-3 px-2 outline-none text-sm resize-none" placeholder="Ketik instruksi neural..."></textarea>
+                            <button onclick="sendNeural()" class="p-3 bg-indigo-600 rounded-xl hover:bg-indigo-500 active:scale-95 transition-all text-white active-glow">
+                                <i data-lucide="send" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Performance Toggle (Gemini Style) -->
+                    <div class="flex justify-between items-center px-2 mt-3">
+                        <div class="flex items-center gap-4">
+                            <label class="flex items-center gap-2 text-[10px] font-bold uppercase cursor-pointer">
+                                <input type="radio" name="speed" value="fast" checked class="accent-indigo-500"> Flash
+                            </label>
+                            <label class="flex items-center gap-2 text-[10px] font-bold uppercase cursor-pointer">
+                                <input type="radio" name="speed" value="pro" class="accent-purple-500"> Pro
+                            </label>
+                        </div>
+                        <span class="text-[9px] text-gray-500 italic">Nexus Core Engine v12.4</span>
                     </div>
                 </div>
             </div>
         </main>
-    </div>
 
-    <aside id="sidebar" class="fixed inset-y-0 right-0 w-80 translate-x-full glass-bright z-[2500] transition-transform duration-500 flex flex-col p-6 shadow-2xl">
-        <div class="flex justify-between items-center mb-10">
-            <h3 class="font-black italic text-xl uppercase tracking-tighter">Vault <span class="text-indigo-400 italic">Access</span></h3>
-            <button onclick="toggleSidebar()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/10"><i class="fa-solid fa-xmark text-xs"></i></button>
-        </div>
-
-        <div class="flex-1 overflow-y-auto no-scrollbar space-y-8">
-            <div class="p-5 bg-white/5 rounded-3xl border border-white/5 space-y-4">
-                <label class="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">Gemini API Key</label>
-                <input type="password" id="geminiKey" class="w-full bg-slate-900/50 border border-white/10 p-3 rounded-xl text-xs outline-none focus:border-indigo-500" placeholder="Enter AI Key...">
-                <button onclick="saveApiKey()" class="w-full py-4 bg-indigo-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500 transition shadow-lg shadow-indigo-600/20">Sync Neural Key</button>
+        <!-- SLIDE OVER: HISTORY -->
+        <div id="history-panel" class="fixed inset-y-0 right-0 w-[85%] md:w-[400px] glass-card rounded-r-none translate-x-full transition-transform duration-300 z-[100] flex flex-col">
+            <div class="p-6 border-b border-white/10 flex items-center justify-between">
+                <h3 class="text-lg font-black italic uppercase italic">Neural History</h3>
+                <button onclick="toggleHistory()" class="text-gray-400"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
-
-            <div class="space-y-4">
-                <label class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] px-1 italic">Log History</label>
-                <div id="historyList" class="space-y-2">
-                    <p class="text-[10px] text-slate-600 text-center py-10 uppercase font-bold italic tracking-widest">No Logs Available</p>
+            <div class="flex-1 overflow-y-auto p-4 space-y-3" id="history-list">
+                <!-- User History -->
+                <div class="p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-indigo-500/50 cursor-pointer transition-all">
+                    <p class="text-[10px] text-indigo-400 font-bold mb-1">ARCHITECT • 2 MIN LALU</p>
+                    <p class="text-sm font-semibold truncate">Build responsive dashboard using Tailwind...</p>
                 </div>
             </div>
         </div>
 
-        <button onclick="handleLogout()" class="mt-8 py-4 bg-red-500/10 text-red-500 border border-red-500/20 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-red-500/20 transition">Terminasi Sesi</button>
-    </aside>
+        <!-- SLIDE OVER: SETTINGS / API KEY -->
+        <div id="settings-panel" class="fixed inset-y-0 right-0 w-[85%] md:w-[400px] glass-card rounded-r-none translate-x-full transition-transform duration-300 z-[100] flex flex-col">
+            <div class="p-6 border-b border-white/10 flex items-center justify-between">
+                <h3 class="text-lg font-black italic uppercase italic">Nexus Config</h3>
+                <button onclick="toggleSettings()" class="text-gray-400"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <div class="p-6 space-y-8">
+                <div>
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-indigo-400 block mb-3">Google Gemini API Key</label>
+                    <div class="relative">
+                        <input type="password" id="api-key-input" placeholder="Masukkan Key Anda..." class="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-mono text-xs">
+                    </div>
+                    <button onclick="saveApiKey()" class="w-full mt-4 bg-indigo-600 py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg active-glow">Save Neural Key</button>
+                    <p class="text-[9px] text-gray-500 mt-2 italic text-center">Key disimpan secara lokal untuk sesi ini.</p>
+                </div>
+                
+                <div class="space-y-4">
+                    <h4 class="text-[10px] font-bold uppercase text-gray-400 tracking-widest">Display Preferences</h4>
+                    <div class="flex items-center justify-between glass-card p-4">
+                        <span class="text-sm">High Contrast Mode</span>
+                        <input type="checkbox" class="w-5 h-5 accent-indigo-500" checked>
+                    </div>
+                    <div class="flex items-center justify-between glass-card p-4">
+                        <span class="text-sm">Neural Animations</span>
+                        <input type="checkbox" class="w-5 h-5 accent-indigo-500" checked>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, onSnapshot, serverTimestamp, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBK-MehTTzURY5jT5stH363Y5_WE4iy-XA",
-            authDomain: "volca-tools.firebaseapp.com",
-            projectId: "volca-tools",
-            storageBucket: "volca-tools.firebasestorage.app",
-            messagingSenderId: "262525907487",
-            appId: "1:262525907487:web:4abc37fa3b583223569b2a"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
+        <div id="overlay" onclick="closeAllPanels()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] hidden"></div>
         
-        let isLoginMode = true;
-        let currentUser = null;
+        <input type="file" id="file-input" class="hidden" multiple>
 
-        onAuthStateChanged(auth, async (user) => {
-            const loader = document.getElementById('loader');
-            const authScreen = document.getElementById('authScreen');
-            const mainUI = document.getElementById('mainUI');
-            
-            if(user) {
-                currentUser = user;
-                document.getElementById('userNameDisp').innerText = (user.displayName || user.email.split('@')[0]).toUpperCase();
-                document.getElementById('userAvatar').innerText = (user.displayName || user.email.split('@')[0]).charAt(0).toUpperCase();
-                
-                const keyDoc = await getDoc(doc(db, 'artifacts', 'virza-v12', 'users', user.uid, 'vault', 'gemini'));
-                if(keyDoc.exists()) {
-                    localStorage.setItem('nexus_key', keyDoc.data().key);
-                    document.getElementById('geminiKey').value = keyDoc.data().key;
-                }
-                authScreen.style.display = 'none';
-                mainUI.style.display = 'flex';
-                loadHistory();
-            } else {
-                authScreen.style.display = 'flex';
-                mainUI.style.display = 'none';
-            }
-            loader.style.opacity = '0';
-            setTimeout(() => loader.style.display = 'none', 500);
-        });
-
-        window.handleAuth = () => {
-            const email = document.getElementById('emailIn').value;
-            const pass = document.getElementById('passIn').value;
-            if(!email || !pass) return;
-            if(isLoginMode) {
-                signInWithEmailAndPassword(auth, email, pass).catch(e => alert(e.message));
-            } else {
-                createUserWithEmailAndPassword(auth, email, pass).catch(e => alert(e.message));
-            }
-        };
-
-        window.saveApiKey = async () => {
-            const key = document.getElementById('geminiKey').value;
-            if(!key || !currentUser) return;
-            await setDoc(doc(db, 'artifacts', 'virza-v12', 'users', currentUser.uid, 'vault', 'gemini'), { key });
-            localStorage.setItem('nexus_key', key);
-            alert("API Key Synchronized.");
-        };
-
-        async function loadHistory() {
-            if(!currentUser) return;
-            const q = query(collection(db, 'artifacts', 'virza-v12', 'users', currentUser.uid, 'history'), orderBy('timestamp', 'desc'), limit(15));
-            onSnapshot(q, (snap) => {
-                const list = document.getElementById('historyList');
-                list.innerHTML = "";
-                snap.forEach(d => {
-                    const data = d.data();
-                    list.innerHTML += `
-                        <div class="p-3 bg-white/5 border border-white/5 rounded-xl cursor-pointer hover:bg-white/10 transition">
-                            <p class="text-[8px] text-indigo-400 font-black uppercase tracking-widest">${data.portal || 'GENERAL'}</p>
-                            <p class="text-[10px] text-slate-400 truncate italic">"${data.prompt}"</p>
-                        </div>
-                    `;
-                });
-            });
-        }
-
-        window.sendMessage = async () => {
-            const input = document.getElementById('mainInput');
-            const prompt = input.value.trim();
-            const key = localStorage.getItem('nexus_key');
-            
-            if(!prompt) return;
-            if(!key) { alert("Input API Key in Sidebar!"); toggleSidebar(); return; }
-
-            const chat = document.getElementById('chatBox');
-            chat.innerHTML += `<div class="flex justify-end mb-4 msg-pop"><div class="max-w-[80%] bg-indigo-600 p-4 rounded-2xl rounded-br-none text-xs font-semibold shadow-lg">${prompt}</div></div>`;
-            input.value = "";
-            input.style.height = 'auto';
-            chat.scrollTop = chat.scrollHeight;
-
-            if(currentUser) {
-                addDoc(collection(db, 'artifacts', 'virza-v12', 'users', currentUser.uid, 'history'), {
-                    prompt, portal: activePortal, timestamp: serverTimestamp()
-                });
-            }
-
-            try {
-                document.getElementById('sendBtn').disabled = true;
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${key}`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                });
-                const data = await res.json();
-                const responseText = data.candidates[0].content.parts[0].text;
-                
-                chat.innerHTML += `<div class="flex justify-start mb-4 msg-pop"><div class="max-w-[90%] bg-white/5 border border-white/5 p-4 rounded-2xl rounded-bl-none text-xs leading-relaxed text-slate-300">${responseText.replace(/\n/g, '<br>')}</div></div>`;
-                
-                const htmlMatch = responseText.match(/```html?([\s\S]*?)```/);
-                if(htmlMatch) {
-                    toggleCanvas(true);
-                    const blob = new Blob([htmlMatch[1].trim()], { type: 'text/html' });
-                    document.getElementById('artifactFrame').src = URL.createObjectURL(blob);
-                }
-                document.getElementById('sendBtn').disabled = false;
-            } catch (e) {
-                chat.innerHTML += `<div class="text-red-500 text-[9px] font-black uppercase text-center py-2 tracking-[0.3em]">Neural Link Error</div>`;
-                document.getElementById('sendBtn').disabled = false;
-            }
-            chat.scrollTop = chat.scrollHeight;
-        };
-    </script>
+         </div>
 
     <script>
-        function autoSize(el) {
-            el.style.height = 'auto';
-            el.style.height = el.scrollHeight + 'px';
-        }
+        // Initialize Lucide Icons
+        lucide.createIcons();
 
-        function initClock() {
-            const tick = () => {
-                document.getElementById('timeDisplay').innerText = new Date().toLocaleTimeString('id-ID', { hour12: false });
-                setTimeout(tick, 1000);
+        // State Management
+        let currentView = 'home';
+        let activePortal = null;
+        let apiKey = '';
+
+        // Time Updates
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + '.' + 
+                            now.getMinutes().toString().padStart(2, '0') + '.' + 
+                            now.getSeconds().toString().padStart(2, '0');
+            document.getElementById('current-time').innerText = timeStr;
+            
+            const days = ['MINGGU', 'SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU'];
+            const months = ['JAN', 'FEB', 'MAR', 'APR', 'MEI', 'JUN', 'JUL', 'AGU', 'SEP', 'OKT', 'NOV', 'DES'];
+            const dateStr = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+            document.getElementById('current-date').innerText = dateStr;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Navigation
+        function openPortal(type) {
+            currentView = 'portal';
+            activePortal = type;
+            document.getElementById('view-home').classList.add('hidden');
+            document.getElementById('view-portal').classList.remove('hidden');
+            
+            const titles = {
+                'architect': 'Nexus Architect',
+                'image': 'Visual Engine HD',
+                'chat': 'Nexus Smart AI',
+                'vision': 'Vision Analysis',
+                'weaver': 'Web Weaver'
             };
-            tick();
-            if(navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(() => {
-                    document.getElementById('gpsDot').classList.replace('bg-red-500', 'bg-green-500');
-                    document.getElementById('locTxt').innerText = "SAT-LINK ACTIVE";
-                });
-            }
-        }
-        initClock();
-
-        const allPortals = [
-            { id: 'coding', name: 'Architect', icon: 'fa-code', color: '#818cf8' },
-            { id: 'image', name: 'Image HD', icon: 'fa-image', color: '#f472b6' },
-            { id: 'chat', name: 'Smart AI', icon: 'fa-comment', color: '#34d399' },
-            { id: 'vision', name: 'Vision Pro', icon: 'fa-eye', color: '#fbbf24' },
-            { id: 'web', name: 'Web Weaver', icon: 'fa-globe', color: '#60a5fa' },
-            { id: 'shield', name: 'Cyber Guard', icon: 'fa-shield', color: '#f87171' },
-            { id: 'math', name: 'Quantum', icon: 'fa-calculator', color: '#a78bfa' },
-            { id: 'seo', name: 'SEO Master', icon: 'fa-magnifying-glass', color: '#2dd4bf' },
-            { id: 'data', name: 'Data Analyst', icon: 'fa-chart-pie', color: '#fb7185' },
-            { id: 'copy', name: 'Copywriter', icon: 'fa-pen-nib', color: '#fb923c' },
-            { id: 'trans', name: 'Translator', icon: 'fa-language', color: '#38bdf8' },
-            { id: 'legal', name: 'Legal Mind', icon: 'fa-gavel', color: '#94a3b8' },
-            { id: 'health', name: 'Health Bot', icon: 'fa-heart-pulse', color: '#f43f5e' },
-            { id: 'finance', name: 'Finance Pro', icon: 'fa-wallet', color: '#10b981' },
-            { id: 'history', name: 'History Buff', icon: 'fa-book-atlas', color: '#d946ef' },
-            { id: 'music', name: 'Music Synth', icon: 'fa-music', color: '#6366f1' },
-            { id: 'game', name: 'Gaming Mod', icon: 'fa-gamepad', color: '#f59e0b' },
-            { id: 'travel', name: 'Travel Guide', icon: 'fa-map-location-dot', color: '#14b8a6' },
-            { id: 'social', name: 'Social Engine', icon: 'fa-share-nodes', color: '#f472b6' },
-            { id: 'mind', name: 'Deep Mind', icon: 'fa-brain', color: '#a78bfa' }
-        ];
-
-        function renderPortals(data) {
-            const grid = document.getElementById('portalGrid');
-            grid.innerHTML = (data || allPortals).map(p => `
-                <div onclick="enterPortal('${p.id}', '${p.name}')" class="p-card p-5 flex flex-col items-center gap-3">
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center text-lg border border-white/5" style="background: ${p.color}15; color: ${p.color}">
-                        <i class="fa-solid ${p.icon}"></i>
+            document.getElementById('portal-title').innerText = titles[type];
+            
+            // Toggle Dual View for Architect/Weaver
+            const isWeb = type === 'architect' || type === 'weaver';
+            document.getElementById('dual-view-container').classList.toggle('hidden', !isWeb);
+            
+            // Clear chat for fresh start
+            const chatBox = document.getElementById('chat-messages');
+            chatBox.innerHTML = `
+                <div class="flex flex-col gap-1 max-w-[80%] fade-in">
+                    <div class="p-4 rounded-2xl rounded-tl-none glass-card text-sm leading-relaxed">
+                        Protokol ${titles[type]} diaktifkan. Apa yang ingin Anda kembangkan sekarang?
                     </div>
-                    <span class="text-[8px] font-black uppercase tracking-widest text-slate-400 text-center">${p.name}</span>
+                    <span class="text-[9px] text-indigo-400 ml-1">SYSTEM ${new Date().getHours()}:${new Date().getMinutes()}</span>
                 </div>
-            `).join('');
+            `;
         }
-        renderPortals();
 
-        let activePortal = "General";
-        window.enterPortal = (id, name) => {
-            activePortal = name;
-            document.getElementById('lobbyView').classList.add('hidden');
-            document.getElementById('workspaceView').classList.remove('hidden');
-            document.getElementById('backToLobby').classList.remove('hidden');
-            document.getElementById('welcomeMsg').innerText = `Portal ${name} Aktif. Silahkan masukkan instruksi neural Anda.`;
-        };
+        function goHome() {
+            document.getElementById('view-home').classList.remove('hidden');
+            document.getElementById('view-portal').classList.add('hidden');
+            currentView = 'home';
+        }
 
-        window.exitPortal = () => {
-            document.getElementById('lobbyView').classList.remove('hidden');
-            document.getElementById('workspaceView').classList.add('hidden');
-            document.getElementById('backToLobby').classList.add('hidden');
-            toggleCanvas(false);
-        };
+        // Panel Controls
+        function toggleHistory() {
+            const panel = document.getElementById('history-panel');
+            const overlay = document.getElementById('overlay');
+            panel.classList.toggle('translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
 
-        window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('translate-x-full');
+        function toggleSettings() {
+            const panel = document.getElementById('settings-panel');
+            const overlay = document.getElementById('overlay');
+            panel.classList.toggle('translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
 
-        function toggleCanvas(show) {
-            const panel = document.getElementById('previewPanel');
-            const layout = document.getElementById('workspaceView');
-            if(show) {
-                panel.classList.remove('hidden');
-                layout.classList.add('split-active');
+        function closeAllPanels() {
+            document.getElementById('history-panel').classList.add('translate-x-full');
+            document.getElementById('settings-panel').classList.add('translate-x-full');
+            document.getElementById('overlay').classList.add('hidden');
+        }
+
+        // Chat Fungsionalitas
+        const inputField = document.getElementById('neural-input');
+        inputField.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        function sendNeural() {
+            const text = inputField.value.trim();
+            if(!text) return;
+
+            // Add User Bubble
+            addMessage('user', text);
+            inputField.value = '';
+            inputField.style.height = 'auto';
+
+            // Simulate System Response
+            setTimeout(() => {
+                const response = getSimulatedResponse(text);
+                addMessage('system', response);
+                
+                // If it's a code request, update preview
+                if(activePortal === 'architect' || activePortal === 'weaver') {
+                    updatePreview(text);
+                }
+            }, 800);
+        }
+
+        function addMessage(sender, text) {
+            const chatBox = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            const time = new Date().getHours() + ':' + new Date().getMinutes();
+            
+            if(sender === 'user') {
+                div.className = 'flex flex-col gap-1 items-end ml-auto max-w-[85%] fade-in';
+                div.innerHTML = `
+                    <div class="p-4 rounded-2xl rounded-tr-none bg-indigo-600 text-white text-sm leading-relaxed shadow-lg">
+                        ${text}
+                    </div>
+                    <span class="text-[9px] text-gray-500 mr-1">YOU ${time}</span>
+                `;
             } else {
-                panel.classList.add('hidden');
-                layout.classList.remove('split-active');
+                div.className = 'flex flex-col gap-1 max-w-[85%] fade-in';
+                div.innerHTML = `
+                    <div class="p-4 rounded-2xl rounded-tl-none glass-card text-sm leading-relaxed border-l-2 border-indigo-500">
+                        <div class="typing-text">${text}</div>
+                    </div>
+                    <span class="text-[9px] text-indigo-400 ml-1">NEXUS ${time}</span>
+                `;
+            }
+            
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Add to history
+            if(sender === 'user') {
+                const histList = document.getElementById('history-list');
+                const hDiv = document.createElement('div');
+                hDiv.className = 'p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-indigo-500/50 cursor-pointer transition-all';
+                hDiv.innerHTML = `<p class="text-[10px] text-indigo-400 font-bold mb-1 uppercase">${activePortal} • BARU SAJA</p><p class="text-sm font-semibold truncate">${text}</p>`;
+                histList.prepend(hDiv);
             }
         }
 
-        window.filterPortals = () => {
-            const q = document.getElementById('pSearch').value.toLowerCase();
-            renderPortals(allPortals.filter(p => p.name.toLowerCase().includes(q)));
+        function getSimulatedResponse(text) {
+            if(text.toLowerCase().includes('buatkan') || text.toLowerCase().includes('website')) {
+                return "Permintaan diterima. Menghasilkan struktur neural untuk komponen website Anda. Lihat panel preview di atas untuk hasil langsung.";
+            }
+            if(text.toLowerCase().includes('halo') || text.toLowerCase().includes('hi')) {
+                return "Halo Master Mantusi! Protokol Nexus V12 siap membantu. Dimensi mana yang ingin Anda jelajahi hari ini?";
+            }
+            return "Analisis instruksi selesai. Melakukan pemrosesan data di Cloud Database... " + (apiKey ? "Menggunakan API Gemini Pro." : "Berjalan dalam mode simulasi (API Key belum diatur).");
+        }
+
+        function updatePreview(text) {
+            const preview = document.getElementById('live-preview');
+            const editor = document.getElementById('neural-editor');
+            
+            // Mock code generation
+            const mockCode = `
+                <html>
+                    <style>
+                        body { background: #000; color: #fff; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; }
+                        .card { border: 2px solid #6366f1; padding: 20px; border-radius: 15px; text-align: center; }
+                    </style>
+                    <body>
+                        <div class="card">
+                            <h1>Hasil Neural Weaver</h1>
+                            <p>Instruksi: "${text}"</p>
+                            <small>Nexus v12 Live Preview</small>
+                        </div>
+                    </body>
+                </html>
+            `;
+            
+            editor.value = mockCode;
+            const blob = new Blob([mockCode], {type: 'text/html'});
+            preview.src = URL.createObjectURL(blob);
+        }
+
+        // File Attachment Handling
+        function triggerFile(type) {
+            const input = document.getElementById('file-input');
+            input.accept = type === 'image' ? 'image/*' : '*/*';
+            input.click();
+        }
+
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const preview = document.getElementById('attachment-preview');
+            preview.classList.remove('hidden');
+            preview.innerHTML = '';
+            
+            Array.from(this.files).forEach(file => {
+                const chip = document.createElement('div');
+                chip.className = 'flex items-center gap-2 bg-indigo-500/20 px-3 py-1.5 rounded-full text-[10px] border border-indigo-500/30';
+                chip.innerHTML = `<i data-lucide="file" class="w-3 h-3"></i> ${file.name.substring(0, 10)}...`;
+                preview.appendChild(chip);
+            });
+            lucide.createIcons();
+        });
+
+        // API Key Storage
+        function saveApiKey() {
+            const val = document.getElementById('api-key-input').value;
+            if(val) {
+                apiKey = val;
+                localStorage.setItem('nexus_gemini_key', val);
+                const btn = event.target;
+                btn.innerText = "KEY SAVED!";
+                btn.classList.add('bg-emerald-600');
+                setTimeout(() => {
+                    btn.innerText = "Save Neural Key";
+                    btn.classList.remove('bg-emerald-600');
+                    toggleSettings();
+                }, 1500);
+            }
+        }
+
+  // Load saved key if exists
+        window.onload = () => {
+            const saved = localStorage.getItem('nexus_gemini_key');
+            if(saved) {
+                apiKey = saved;
+                document.getElementById('api-key-input').value = saved;
+            }
         };
+
     </script>
 </body>
-</html>l
+</html>
