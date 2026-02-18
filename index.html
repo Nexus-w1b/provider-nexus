@@ -13,115 +13,90 @@
         .workspace-layout { display: flex; flex-direction: column; height: calc(100vh - 100px); }
         @media (min-width: 1024px) { .workspace-layout { display: grid; grid-template-columns: 450px 1fr; } }
         
-        .portal-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; background: rgba(30, 41, 59, 0.2); border: 1px solid rgba(255, 255, 255, 0.05); position: relative; overflow: hidden; }
-        .portal-card:hover { border-color: var(--accent); transform: translateY(-5px); background: rgba(99, 102, 241, 0.1); box-shadow: 0 20px 40px -20px var(--accent); }
+        .portal-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; background: rgba(30, 41, 59, 0.3); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 2rem; }
+        .portal-card:hover { border-color: var(--accent); transform: translateY(-3px); background: rgba(99, 102, 241, 0.1); }
         
         #canvasFrame { background: white; border-radius: 1.5rem; width: 100%; height: 100%; border: none; }
-        .sidebar-settings { transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); background: rgba(2, 6, 23, 0.98); z-index: 1200; box-shadow: -20px 0 50px rgba(0,0,0,0.5); }
+        .sidebar-settings { transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); background: #020617; z-index: 1200; box-shadow: -20px 0 60px rgba(0,0,0,0.8); }
+        
+        .history-item { transition: all 0.2s; border-left: 2px solid transparent; }
+        .history-item:hover { background: rgba(99, 102, 241, 0.1); border-left-color: var(--accent); }
+        
         .no-scrollbar::-webkit-scrollbar { display: none; }
-
-        .chat-bubble { max-width: 85%; padding: 1rem; border-radius: 1.5rem; font-size: 0.8rem; line-height: 1.5; margin-bottom: 1rem; }
-        .user-msg { background: var(--accent); color: white; border-bottom-right-radius: 0.25rem; margin-left: auto; }
-        .ai-msg { background: rgba(255,255,255,0.05); color: #cbd5e1; border-bottom-left-radius: 0.25rem; border: 1px solid rgba(255,255,255,0.1); }
-
-        input[type=range] { -webkit-appearance: none; background: rgba(255,255,255,0.05); border-radius: 10px; height: 6px; width: 100%; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid #fff; }
+        .loading-screen { position: fixed; inset: 0; background: #020617; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        
+        .gps-badge { font-size: 8px; font-weight: 800; padding: 2px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; }
     </style>
 </head>
 <body class="h-screen flex flex-col">
 
-    <!-- Loading Engine -->
-    <div id="loadingScreen" class="fixed inset-0 bg-[#020617] z-[2000] flex flex-col items-center justify-center transition-opacity duration-700">
-        <div class="relative">
-            <div class="w-24 h-24 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
-            <div class="absolute inset-0 flex items-center justify-center"><i class="fa-solid fa-atom text-2xl text-indigo-500 animate-pulse"></i></div>
-        </div>
-        <h2 class="mt-8 text-xl font-black italic tracking-tighter uppercase">VIRZA NEXUS <span class="text-indigo-500">V12</span></h2>
-        <p class="text-[9px] font-bold text-slate-500 uppercase tracking-[0.4em] mt-2">Connecting to Firebase Cloud...</p>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+        <h2 class="mt-6 text-xs font-black italic tracking-tighter uppercase">NEXUS <span class="text-indigo-500">V12</span></h2>
     </div>
 
-    <!-- Auth Gateway -->
+    <!-- Auth Page -->
     <div id="authPage" class="fixed inset-0 z-[1100] hidden flex items-center justify-center p-6 bg-slate-950">
-        <div class="w-full max-w-md glass p-10 rounded-[40px] border-white/5 shadow-2xl">
-            <div class="text-center mb-10">
-                <h1 id="authTitle" class="text-3xl font-black italic tracking-tighter">VIRZA <span class="text-indigo-500">NEXUS</span></h1>
-                <p class="text-[8px] font-bold text-slate-500 mt-2 uppercase tracking-widest">Secured Firebase Auth</p>
-            </div>
+        <div class="w-full max-w-md glass p-10 rounded-[40px]">
+            <h1 class="text-2xl font-black italic text-center mb-8 uppercase">VIRZA <span class="text-indigo-500">NEXUS</span></h1>
             <div class="space-y-4">
-                <input type="email" id="email" class="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none focus:border-indigo-500 text-sm" placeholder="Email">
-                <input type="password" id="password" class="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none focus:border-indigo-500 text-sm" placeholder="Password">
-                <button onclick="handleAuth()" id="mainAuthBtn" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-sm transition active:scale-95 shadow-lg shadow-indigo-500/20">AKSES PORTAL</button>
-                <div class="relative py-2"><div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/10"></div></div><div class="relative flex justify-center text-[7px] uppercase font-bold text-slate-500"><span class="bg-slate-950 px-2">Social Link</span></div></div>
-                <button onclick="loginGoogle()" class="w-full py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-bold text-sm transition flex items-center justify-center gap-3 border border-white/10">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="16"> Google Account
-                </button>
-                <button onclick="toggleAuthMode()" id="toggleBtn" class="w-full text-[10px] text-slate-500 font-black uppercase tracking-widest mt-4">Register di sini</button>
+                <input type="email" id="email" class="w-full p-4 bg-white/5 rounded-2xl border border-white/10 text-sm outline-none focus:border-indigo-500" placeholder="Email">
+                <input type="password" id="password" class="w-full p-4 bg-white/5 rounded-2xl border border-white/10 text-sm outline-none focus:border-indigo-500" placeholder="Password">
+                <button onclick="handleAuth()" class="w-full py-4 bg-indigo-600 rounded-2xl font-black text-xs uppercase tracking-widest">Akses dashboard</button>
             </div>
         </div>
     </div>
 
     <div id="appContent" class="hidden h-full flex flex-col">
-        <!-- Header -->
         <header class="w-full p-6 flex justify-between items-center z-50 border-b border-white/5 h-24 glass">
-            <div class="flex items-center gap-6">
-                <button id="backBtn" onclick="goToLobby()" class="hidden w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center transition border border-white/10">
+            <div class="flex items-center gap-4">
+                <button id="backBtn" onclick="goToLobby()" class="hidden w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10">
                     <i class="fa-solid fa-arrow-left text-xs"></i>
                 </button>
-                <div>
-                    <h1 class="text-xl font-black italic tracking-tighter">VIRZA NEXUS<span class="text-indigo-500">V12</span></h1>
-                    <p id="portalStatus" class="text-[8px] font-bold text-slate-500 uppercase tracking-[0.3em]">Cloud Database Active</p>
+                <div class="flex flex-col">
+                    <div class="flex items-center gap-2">
+                        <div id="gpsStatus" class="gps-badge bg-red-500/10 text-red-500">
+                            <i class="fa-solid fa-location-crosshairs"></i> GPS OFFLINE
+                        </div>
+                        <span id="locationName" class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Searching...</span>
+                    </div>
+                    <div id="fullDate" class="text-[9px] font-black text-indigo-400 uppercase tracking-widest mt-1">MEMUAT...</div>
+                    <span id="liveClock" class="text-xl font-black italic tracking-tighter">00:00:00</span>
                 </div>
             </div>
-            <div class="flex items-center gap-6">
-                <div class="text-right hidden sm:block">
-                    <span id="clock" class="text-xl font-black font-mono leading-none block">00:00:00</span>
-                    <span id="userDispName" class="text-[8px] font-bold text-indigo-400 uppercase tracking-widest">Guest User</span>
+
+            <div class="flex items-center gap-4">
+                <div onclick="toggleSidebar()" class="w-11 h-11 rounded-full bg-indigo-600 flex items-center justify-center font-black border-2 border-white/10 cursor-pointer overflow-hidden shadow-lg shadow-indigo-500/20 active:scale-90 transition">
+                    <span id="userInitial">V</span>
                 </div>
-                <button onclick="toggleSidebar()" class="w-12 h-12 rounded-2xl bg-indigo-600/10 border border-indigo-500/20 flex items-center justify-center hover:bg-indigo-600 transition text-indigo-400 hover:text-white">
+                <button onclick="toggleSidebar()" class="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400">
                     <i class="fa-solid fa-sliders-h"></i>
                 </button>
             </div>
         </header>
-
-                <main class="flex-1 overflow-hidden relative">
-            <!-- Lobby -->
+        
+        <main class="flex-1 overflow-hidden relative">
             <div id="lobby" class="absolute inset-0 overflow-y-auto p-6 no-scrollbar">
-                <div class="max-w-6xl mx-auto py-8 space-y-10">
+                <div class="max-w-6xl mx-auto py-4 space-y-6 text-center">
+                    <h2 class="text-4xl font-black italic tracking-tighter">HI, <span id="welcomeName" class="text-indigo-500 uppercase">COMMANDER</span></h2>
                     <div class="relative max-w-xl mx-auto">
-                        <i class="fa-solid fa-magnifying-glass absolute left-6 top-1/2 -translate-y-1/2 text-slate-500"></i>
-                        <input type="text" id="portalSearch" oninput="filterPortals()" class="w-full bg-white/5 border border-white/10 p-5 pl-14 rounded-full text-sm outline-none focus:border-indigo-500 transition" placeholder="Cari 13 Dimensi Utama...">
+                        <i class="fa-solid fa-search absolute left-6 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                        <input type="text" id="portalSearch" oninput="filterPortals()" class="w-full bg-white/5 border border-white/10 p-5 pl-14 rounded-full text-sm outline-none focus:border-indigo-500" placeholder="Cari Dimensi...">
                     </div>
-                    <div id="portalGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
                 </div>
+                <div id="portalGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-8 max-w-6xl mx-auto"></div>
             </div>
-
-            <!-- Workspace -->
             <div id="workspace" class="hidden absolute inset-0 workspace-layout">
                 <div class="flex flex-col border-r border-white/5 bg-slate-950/50">
                     <div id="chatHistory" class="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar"></div>
-                    <div class="p-4 bg-slate-900/80 border-t border-white/5 space-y-4">
-                        <div class="flex justify-between items-center px-2">
-                             <select id="engineSelect" class="bg-slate-950 border border-white/10 rounded-lg px-3 py-1 text-[9px] font-black uppercase text-indigo-400 outline-none">
-                                <option value="gemini">⚡ Gemini 2.5 Flash</option>
-                            </select>
-                            <button onclick="clearCurrentChat()" class="text-[9px] font-black text-red-500 uppercase">Clear Chat</button>
-                        </div>
-                        <div class="relative">
-                            <textarea id="aiInput" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 pr-14 text-sm text-white placeholder-slate-600 outline-none focus:border-indigo-500 transition resize-none" rows="2" placeholder="Neural instruction..."></textarea>
-                            <button onclick="executeAI()" id="runBtn" class="absolute bottom-3 right-3 w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg hover:scale-105 transition">
-                                <i class="fa-solid fa-paper-plane text-xs"></i>
-                            </button>
-                        </div>
+                    <div class="p-4 bg-slate-900 border-t border-white/5 space-y-3">
+                        <textarea id="aiInput" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs text-white placeholder-slate-600 outline-none focus:border-indigo-500 resize-none" rows="2" placeholder="Input neural data..."></textarea>
+                        <button onclick="executeAI()" class="w-full py-4 bg-indigo-600 rounded-xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition">Execute Portal</button>
                     </div>
                 </div>
-
-                <!-- Preview Area -->
-                <div id="previewArea" class="relative bg-[#0b1120] p-4 flex flex-col h-full overflow-hidden">
-                    <div class="flex justify-between items-center mb-4 px-2">
-                        <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Live Preview</span>
-                        <button onclick="copyCanvasCode()" class="text-[9px] font-black text-indigo-400 uppercase">Copy Code</button>
-                    </div>
-                    <div class="flex-1 glass rounded-[2rem] overflow-hidden">
+                <div class="relative bg-slate-950 p-4 h-full overflow-hidden">
+                    <div class="glass rounded-[2rem] overflow-hidden h-full">
                         <iframe id="canvasFrame" sandbox="allow-scripts allow-modals"></iframe>
                     </div>
                 </div>
@@ -129,29 +104,52 @@
         </main>
     </div>
 
-    <!-- Sidebar Config -->
-    <aside id="sidebar" class="sidebar-settings fixed inset-y-0 right-0 w-80 translate-x-full p-8 flex flex-col gap-6 border-l border-white/10">
-        <h2 class="text-xl font-black italic">CONFIG<span class="text-indigo-500">CORE</span></h2>
+    <aside id="sidebar" class="sidebar-settings fixed inset-y-0 right-0 w-80 translate-x-full p-8 flex flex-col border-l border-white/10">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-black italic tracking-tighter uppercase">NEXUS <span class="text-indigo-500">ID</span></h2>
+            <button onclick="toggleSidebar()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+        </div>
         
-        <div class="space-y-4">
-            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">API Configuration</label>
-            <input type="password" id="keyGemini" class="w-full bg-slate-950 p-4 rounded-xl border border-white/10 text-xs text-white" placeholder="Gemini API Key">
+        <div class="flex-1 overflow-y-auto no-scrollbar space-y-8">
+            <div class="space-y-4">
+                <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">account settings</label>
+                <div class="space-y-2">
+                    <div class="flex items-center gap-3 p-4 bg-indigo-600/10 border border-indigo-500/30 rounded-2xl">
+                        <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center font-bold text-xs" id="sideInitial">V</div>
+                        <div class="flex-1 overflow-hidden">
+                            <p id="sideUserName" class="text-xs font-black truncate">Commander</p>
+                            <p class="text-[8px] font-bold text-indigo-400 uppercase tracking-widest">Primary Identify</p>
+                        </div>
+                    </div>
+                    <button onclick="alert('Sinkronisasi Akun Kedua...')" class="w-full p-3 border-2 border-dashed border-white/10 rounded-2xl text-[9px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition">
+                        + Tambah Akun
+                    </button>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest"> nexus History</label>
+                <div id="neuralHistoryList" class="space-y-2">
+                    <div class="text-[9px] text-slate-600 text-center py-4 italic">Memproses riwayat cloud...</div>
+                </div>
+            </div
+            <div class="space-y-4">
+                <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">system pikey</label>
+                <input type="password" id="apiKey" class="w-full bg-slate-950 p-4 rounded-xl border border-white/10 text-xs text-white" placeholder="Key Gemini...">
+                <button onclick="saveSettings()" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase shadow-lg shadow-indigo-500/20">Sync Neural</button>
+            </div>
         </div>
 
-        <button onclick="saveSettings()" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase shadow-lg shadow-indigo-500/20 active:scale-95 transition">Sync Cloud Config</button>
-
-        <div class="mt-auto pt-6 border-t border-white/5">
-            <button onclick="handleLogout()" class="w-full py-4 bg-red-500/10 text-red-500 rounded-xl font-black text-[10px] uppercase border border-red-500/20">Terminate Session</button>
+        <div class="pt-6">
+            <button onclick="handleLogout()" class="w-full py-4 bg-red-500/10 text-red-500 rounded-xl font-black text-[10px] uppercase border border-red-500/20">Logout Nexus</button>
         </div>
     </aside>
 
     <script type="module">
-        // Import Firebase dari CDN
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, query, onSnapshot, serverTimestamp, addDoc, orderBy, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, onSnapshot, serverTimestamp, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // CONFIG FIREBASE (GANTI PAKE PUNYA LU KALO BEDA)
         const firebaseConfig = {
             apiKey: "AIzaSyBK-MehTTzURY5jT5stH363Y5_WE4iy-XA",
             authDomain: "volca-tools.firebaseapp.com",
@@ -164,186 +162,188 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
-        const appId = "virza-nexus-v12"; // ID Koleksi di Firestore
 
-        let isReg = false;
-        let activeUser = null;
-        let apiVault = { gemini: "" };
-
-        // AUTH HANDLERS
-        window.handleAuth = async () => {
-            const e = document.getElementById('email').value;
-            const p = document.getElementById('password').value;
-            if(!e || !p) return;
-            try {
-                if(isReg) await createUserWithEmailAndPassword(auth, e, p);
-                else await signInWithEmailAndPassword(auth, e, p);
-            } catch(err) { alert(err.message); }
-        };
-
-        window.loginGoogle = () => signInWithPopup(auth, provider);
-        window.handleLogout = () => signOut(auth);
-        window.toggleAuthMode = () => {
-            isReg = !isReg;
-            document.getElementById('authTitle').innerText = isReg ? 'REGISTER NEXUS' : 'VIRZA NEXUS';
-            document.getElementById('toggleBtn').innerText = isReg ? 'Sudah terdaftar? Login' : 'Belum terdaftar? Register';
-        };
-
-        // AUTH STATE LISTENER
         onAuthStateChanged(auth, async (user) => {
-            activeUser = user;
             const ls = document.getElementById('loadingScreen');
             const ap = document.getElementById('authPage');
             const content = document.getElementById('appContent');
             
             if(user) {
-                // Tarik API Key dari Firestore
-                const vaultRef = doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'vault');
-                const vaultDoc = await getDoc(vaultRef);
-                if(vaultDoc.exists()) {
-                    apiVault = vaultDoc.data();
-                    document.getElementById('keyGemini').value = apiVault.gemini || "";
-                }
+                const name = user.displayName || user.email.split('@')[0];
+                const initial = name.charAt(0).toUpperCase();
+                document.getElementById('welcomeName').innerText = name.toUpperCase();
+                document.getElementById('userInitial').innerText = initial;
+                document.getElementById('sideInitial').innerText = initial;
+                document.getElementById('sideUserName').innerText = name;
                 
-                document.getElementById('userDispName').innerText = user.displayName || user.email.split('@')[0];
                 ap.style.display = 'none';
                 content.style.display = 'flex';
+
+                const vault = await getDoc(doc(db, 'artifacts', 'virza-v12', 'users', user.uid, 'settings', 'vault'));
+                if(vault.exists()) {
+                    const key = vault.data().gemini;
+                    document.getElementById('apiKey').value = key;
+                    localStorage.setItem('virza_v12_key', key);
+                }
+                loadNeuralHistory(user.uid);
             } else {
                 ap.style.display = 'flex';
                 content.style.display = 'none';
             }
-            
-            setTimeout(() => {
-                ls.style.opacity = '0';
-                setTimeout(() => ls.style.display = 'none', 700);
-            }, 800);
+            setTimeout(() => { ls.style.opacity = '0'; setTimeout(() => ls.style.display = 'none', 500); }, 800);
         });
 
-        // CLOUD STORAGE HANDLERS
-        window.saveSettings = async () => {
-            if(!activeUser) return;
-            const key = document.getElementById('keyGemini').value;
-            apiVault = { gemini: key };
-            await setDoc(doc(db, 'artifacts', appId, 'users', activeUser.uid, 'settings', 'vault'), apiVault);
-            alert("API Key Berhasil Disimpan di Cloud!");
-            toggleSidebar();
-        };
-
-        window.listenChat = (portalId) => {
-            if(!activeUser) return;
-            const q = query(collection(db, 'artifacts', appId, 'users', activeUser.uid, 'chats', portalId, 'messages'), orderBy('timestamp', 'asc'));
+        async function loadNeuralHistory(uid) {
+            const q = query(collection(db, 'artifacts', 'virza-v12', 'users', uid, 'history'), orderBy('timestamp', 'desc'), limit(15));
             onSnapshot(q, (snap) => {
-                const box = document.getElementById('chatHistory');
-                box.innerHTML = "";
+                const list = document.getElementById('neuralHistoryList');
+                list.innerHTML = "";
                 snap.forEach(d => {
                     const m = d.data();
-                    const el = document.createElement('div');
-                    el.className = `chat-bubble ${m.role === 'user' ? 'user-msg' : 'ai-msg'}`;
-                    el.innerText = m.text;
-                    box.appendChild(el);
+                    const date = m.timestamp ? m.timestamp.toDate() : new Date();
+                    const days = ["MINGGU", "SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU"];
+                    const dayLabel = days[date.getDay()];
+                    const dateStr = `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()}`;
                     
-                    if(m.role === 'ai' && m.text.includes('```html')) {
-                        const code = m.text.match(/```html?([\s\S]*?)```/);
-                        if(code) updateCanvas(code[1].trim());
-                    }
+                    list.innerHTML += `
+                        <div class="history-item p-3 rounded-xl bg-white/5 border border-white/5 cursor-pointer">
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="text-[7px] font-black text-indigo-400 uppercase tracking-widest">${dayLabel} | ${dateStr}</span>
+                                <span class="text-[7px] font-black text-slate-500 uppercase">${m.portal || 'GENERAL'}</span>
+                            </div>
+                            <p class="text-[10px] text-slate-300 truncate font-bold uppercase tracking-tighter italic">"${m.prompt}"</p>
+                        </div>
+                    `;
                 });
-                box.scrollTop = box.scrollHeight;
             });
+        }
+
+        window.handleAuth = () => {
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('password').value;
+            signInWithEmailAndPassword(auth, e, p).catch(err => alert(err.message));
+        };
+        window.handleLogout = () => signOut(auth);
+        window.saveSettings = async () => {
+            const key = document.getElementById('apiKey').value;
+            if(auth.currentUser) {
+                await setDoc(doc(db, 'artifacts', 'virza-v12', 'users', auth.currentUser.uid, 'settings', 'vault'), { gemini: key });
+                localStorage.setItem('virza_v12_key', key);
+                alert("Cloud Sync Complete!");
+                window.toggleSidebar();
+            }
         };
 
         window.executeAI = async () => {
-            const input = document.getElementById('aiInput');
-            const prompt = input.value.trim();
-            const key = apiVault.gemini;
-            if(!prompt || !key) return alert("Cek API Key di Config!");
+            const prompt = document.getElementById('aiInput').value;
+            const key = localStorage.getItem('virza_v12_key');
+            if(!prompt || !key) return alert("Missing API Key!");
 
-            const portal = window.activePortal;
-            input.value = "";
-            
-            await addDoc(collection(db, 'artifacts', appId, 'users', activeUser.uid, 'chats', portal, 'messages'), {
-                text: prompt, role: 'user', timestamp: serverTimestamp()
-            });
+            const chat = document.getElementById('chatHistory');
+            chat.innerHTML += `<div class="p-4 bg-indigo-600 text-white rounded-2xl rounded-br-none ml-auto text-xs max-w-[85%] mb-4">${prompt}</div>`;
+            document.getElementById('aiInput').value = "";
 
             try {
+                if(auth.currentUser) {
+                    await addDoc(collection(db, 'artifacts', 'virza-v12', 'users', auth.currentUser.uid, 'history'), {
+                        prompt, portal: window.activePortal || 'GENERAL', timestamp: serverTimestamp()
+                    });
+                }
+                
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${key}`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
                 const data = await res.json();
-                const aiText = data.candidates[0].content.parts[0].text;
+                const text = data.candidates[0].content.parts[0].text;
+                chat.innerHTML += `<div class="p-4 bg-white/5 border border-white/5 rounded-2xl rounded-bl-none text-xs text-slate-300 max-w-[85%] mb-4">${text}</div>`;
                 
-                await addDoc(collection(db, 'artifacts', appId, 'users', activeUser.uid, 'chats', portal, 'messages'), {
-                    text: aiText, role: 'ai', timestamp: serverTimestamp()
-                });
-            } catch (err) { alert("AI Signal Lost."); }
-        };
-
-        window.clearCurrentChat = async () => {
-            if(!activeUser || !window.activePortal) return;
-            const colRef = collection(db, 'artifacts', appId, 'users', activeUser.uid, 'chats', window.activePortal, 'messages');
-            const qSnap = await getDocs(colRef);
-            qSnap.forEach(async (d) => await deleteDoc(d.ref));
+                const codeMatch = text.match(/```html?([\s\S]*?)```/);
+                if(codeMatch) {
+                    const blob = new Blob([codeMatch[1].trim()], { type: 'text/html' });
+                    document.getElementById('canvasFrame').src = URL.createObjectURL(blob);
+                }
+            } catch (err) { alert("Signal Lost. Check Key."); }
+            chat.scrollTop = chat.scrollHeight;
         };
     </script>
-    
-    <script>
-        const portals = [
-            { id: 'coding', name: 'Architect', icon: 'fa-code', color: 'blue' },
-            { id: 'image', name: 'Image HD', icon: 'fa-image', color: 'indigo' },
-            { id: 'chat', name: 'Smart Chat', icon: 'fa-comment', color: 'emerald' },
-            { id: 'vision', name: 'Vision Pro', icon: 'fa-eye', color: 'amber' },
-            { id: 'web', name: 'Web Weaver', icon: 'fa-globe', color: 'cyan' }
-        ];
 
-        let activePortal = null;
+    <script>
+        function initGlobalSystems() {
+            const updateClock = () => {
+                const now = new Date();
+                const days = ["MINGGU", "SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU"];
+                const months = ["JAN", "FEB", "MAR", "APR", "MEI", "JUN", "JUL", "AGU", "SEP", "OKT", "NOV", "DES"];
+                
+                document.getElementById('fullDate').innerText = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+                document.getElementById('liveClock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                setTimeout(updateClock, 1000);
+            };
+            updateClock()
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    const badge = document.getElementById('gpsStatus');
+                    badge.classList.remove('bg-red-500/10', 'text-red-500');
+                    badge.classList.add('bg-green-500/10', 'text-green-500');
+                    badge.innerHTML = `<i class="fa-solid fa-satellite-dish"></i> GPS ACTIVE`;
+                    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                    document.getElementById('locationName').innerText = tz.split('/').pop().replace('_', ' ') + " PORT";
+                }, () => {
+                    document.getElementById('locationName').innerText = "LOCATION BLOCKED";
+                });
+            }
+        }
+        initGlobalSystems();
+
+        const portals = [
+            { id: 'coding', name: 'Architect', icon: 'fa-code' },
+            { id: 'image', name: 'Image HD', icon: 'fa-image' },
+            { id: 'chat', name: 'Smart AI', icon: 'fa-comment' },
+            { id: 'vision', name: 'Vision Pro', icon: 'fa-eye' },
+            { id: 'web', name: 'Web Weaver', icon: 'fa-globe' },
+            { id: 'cyber', name: 'Cyber Guard', icon: 'fa-shield' },
+            { id: 'math', name: 'Quantum', icon: 'fa-calculator' },
+            { id: 'seo', name: 'SEO Master', icon: 'fa-magnifying-glass' },
+            { id: 'data', name: 'Data Miner', icon: 'fa-database' },
+            { id: 'social', name: 'Social Ads', icon: 'fa-hashtag' },
+            { id: 'video', name: 'Motion AI', icon: 'fa-film' },
+            { id: 'audio', name: 'Sonic Wave', icon: 'fa-music' },
+            { id: 'logo', name: 'Brand AI', icon: 'fa-pen-nib' },
+            { id: 'lang', name: 'Polyglot', icon: 'fa-language' },
+            { id: 'bug', name: 'Debug Sys', icon: 'fa-bug' },
+            { id: 'cloud', name: 'Cloud Drive', icon: 'fa-cloud' },
+            { id: 'sec', name: 'Vault Pro', icon: 'fa-key' },
+            { id: 'write', name: 'Ghost Writer', icon: 'fa-book' },
+            { id: 'game', name: 'Game Dev', icon: 'fa-gamepad' },
+            { id: 'law', name: 'Law Logic', icon: 'fa-gavel' }
+        ];
 
         function renderPortals(list) {
             const grid = document.getElementById('portalGrid');
-            grid.innerHTML = list.map(p => `
-                <div onclick="enterPortal('${p.id}', '${p.name}')" class="portal-card p-8 rounded-[40px] flex flex-col items-center gap-4 text-center">
-                    <div class="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center text-indigo-400 text-2xl border border-white/10">
+            grid.innerHTML = (list || portals).map(p => `
+                <div onclick="enterPortal('${p.id}', '${p.name}')" class="portal-card p-6 flex flex-col items-center gap-3">
+                    <div class="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-400 text-xl border border-white/5">
                         <i class="fa-solid ${p.icon}"></i>
                     </div>
-                    <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">${p.name}</span>
+                    <span class="text-[8px] font-black uppercase tracking-widest text-slate-400">${p.name}</span>
                 </div>
             `).join('');
         }
-        renderPortals(portals);
+        renderPortals();
 
+        window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('translate-x-full');
         window.enterPortal = (id, name) => {
             window.activePortal = id;
             document.getElementById('lobby').classList.add('hidden');
             document.getElementById('workspace').classList.remove('hidden');
             document.getElementById('backBtn').classList.remove('hidden');
-            document.getElementById('portalStatus').innerText = "Portal: " + name;
-            window.listenChat(id);
         };
-
         window.goToLobby = () => {
-            window.activePortal = null;
             document.getElementById('lobby').classList.remove('hidden');
             document.getElementById('workspace').classList.add('hidden');
             document.getElementById('backBtn').classList.add('hidden');
-            document.getElementById('portalStatus').innerText = "Cloud Database Active";
         };
-
-        window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('translate-x-full');
-
-        function updateCanvas(code) {
-            const frame = document.getElementById('canvasFrame');
-            const blob = new Blob([code], { type: 'text/html' });
-            frame.src = URL.createObjectURL(blob);
-        }
-
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-            setTimeout(updateClock, 1000);
-        }
-
-        window.onload = updateClock;
         window.filterPortals = () => {
             const q = document.getElementById('portalSearch').value.toLowerCase();
             renderPortals(portals.filter(p => p.name.toLowerCase().includes(q)));
