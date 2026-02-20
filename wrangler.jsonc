@@ -1,5 +1,5 @@
 {
-  "name": "virza-nexus",
-  "main": "index.js", 
-  "compatibility_date": "2026-02-20"
+  "name": "virza-cloud-nexus",
+  "compatibility_date": "2026-02-20",
+  "pages_build_output_dir": "./"
 }
