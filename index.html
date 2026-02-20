@@ -1863,7 +1863,7 @@
             <div id="lobbyView" class="lobby-view no-scrollbar">
                 <div class="lobby-content">
                     <div class="welcome-block">
-                        <h2 class="welcome-title">Welcome, <span id="displayName">Commander</span></h2>
+                        <h2 class="welcome-title">Welcome, <span id="displayName">PLAYER NPC</span></h2>
                         <div class="status-badges-row">
                             <span class="status-badge success"><i class="fa-solid fa-circle-check"></i> Gemini Ready</span>
                             <span class="status-badge info"><i class="fa-solid fa-key"></i> <span id="activeKeyCount">20</span> Keys Active</span>
@@ -1977,7 +1977,7 @@
 
         <div class="sidebar-body no-scrollbar">
             <div class="sidebar-section">
-                <div class="sidebar-section-title"><i class="fa-solid fa-microchip"></i> Gemini AI </div>
+                <div class="sidebar-section-title"><i class="fa-solid fa-microchip"></i> NEXUS AI </div>
                 <div class="gemini-status-box">
                     <div class="gemini-icon-box">
                         <i class="fa-solid fa-bolt" style="color: white;"></i>
@@ -1988,16 +1988,16 @@
                     </div>
                 </div>
                 <select class="model-selector" id="modelSelector">
-                    <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                    <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash-8B</option>
+                    <option value="gemini-1.5-flash">Nexus 1.5 Flash</option>
+                    <option value="gemini-1.5-flash-8b">Nexus 1.5 Flash-8B</option>
                     <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
                 </select>
             </div>
 
             <div class="sidebar-section">
-                <div class="sidebar-section-title"><i class="fa-solid fa-key"></i> API Key Pool</div>
+                <div class="sidebar-section-title"><i class="fa-solid fa-key"></i> ACTIVE</div>
                 <div class="key-pool-header">
-                    <span>Active: <strong id="activeKeyNum">20</strong>/20</span>
+                    <span>Active: <strong id="activeKeyNum">2</strong>/2</span>
                     <span id="resetTimer">--</span>
                 </div>
                 <div class="key-grid-display" id="keyGrid"></div>
@@ -2157,8 +2157,11 @@
         let activePortal = 'General';
 
         // API Keys Pool (Placeholder - Replace with real keys)
-        const API_KEYS = Array.from({length: 20}, (_, i) => `KEY_${i + 1}`);
-        
+        const API_KEYS = [
+           "AIzaSyDkUSuxeVnUHUzkANYePkrJMOTeC8Gx71E",
+           "AIzaSyAAtWkmgIQBhJIbsuQAx_y4l_MB2OX1UGs"
+        ];
+
         const portals = [
             { id: 'architect', name: 'Code Architect', icon: 'fa-code', color: '#818cf8', desc: 'Build & design software' },
             { id: 'imager', name: 'Image Forge', icon: 'fa-image', color: '#f472b6', desc: 'Create stunning visuals' },
