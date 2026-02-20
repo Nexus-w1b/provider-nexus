@@ -2541,12 +2541,143 @@
             const prompt = chatInput.value.trim();
             if (!prompt && !currentAttachment) return;
 
-            await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
-
             const keyInfo = getApiKey();
             if (!keyInfo) return;
 
             const { key, index } = keyInfo;
+            const model = document.getElementById('modelSelector').value;
+
+            const parts = [];
+
+            if (currentAttachment && currentAttachment.type === 'image' && currentAttachment.file) {
+                try {
+                    const base64Data = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                            const base64 = reader.result.split(',')[1];
+                            resolve(base64);
+                        };
+                        reader.onerror = reject;
+                        reader.readAsDataURL(currentAttachment.file);
+                    });
+
+                    parts.push({
+                        inline_data: {
+                            mime_type: currentAttachment.file.type,
+                            data: base64Data
+                        }
+                    });
+                } catch (e) {
+                    showToast('Gagal membaca file gambar', 'error');
+                    return;
+                }
+            }
+
+            if (prompt) {
+                parts.push({ text: prompt });
+            } else if (currentAttachment && currentAttachment.type === 'image') {
+                parts.push({ text: "Tolong analisis gambar ini.","ini apa?" });
+            }
+
+            let userMsgHtml = '<div class="chat-message user">';
+            if (currentAttachment?.type === 'image' && currentAttachment.file) {
+                const imgPreviewUrl = URL.createObjectURL(currentAttachment.file);
+                userMsgHtml += `<img src="${imgPreviewUrl}" class="msg-image" style="max-width:150px; border-radius:8px; margin-bottom:5px;">`;
+            }
+            if (currentAttachment) {
+                userMsgHtml += `<div class="msg-attachment"><i class="fa-solid fa-paperclip"></i>${currentAttachment.name}</div>`;
+            }
+            userMsgHtml += `<div class="msg-text">${prompt || "(Mengirim gambar...)"}</div></div>`;
+            chatMessages.innerHTML += userMsgHtml;
+
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            if (currentUser) {
+                try {
+                    await addDoc(collection(db, 'artifacts', 'virza-nexus', 'users', currentUser.uid, 'history'), {
+                        prompt: prompt || "[Image Attachment]",
+                        portal: activePortal,
+                        timestamp: serverTimestamp()
+                    });
+                } catch (e) {}
+            }
+
+            const typingId = 'typing-' + Date.now();
+            chatMessages.innerHTML += `
+                <div id="${typingId}" class="chat-message ai">
+                    <div class="typing-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
+            `;
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                sendBtn.disabled = true;
+                const genConfig = SPEED_CONFIG[currentSpeed] || SPEED_CONFIG.balanced;
+
+                const WORKER_URL = "https://nexus.visiaura.workers.dev"; 
+                const originalUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+                const proxiedUrl = `${WORKER_URL}?url=${encodeURIComponent(originalUrl)}`;
+
+                const response = await fetch(proxiedUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: parts }],
+                        generationConfig: genConfig
+                    })
+                });
+
+                document.getElementById(typingId)?.remove();
+                const data = await response.json();
+
+                if (data.error) {
+                    if (data.error.message?.includes('quota') || data.error.status === 'RESOURCE_EXHAUSTED') {
+                        markKeyExhausted(index);
+                        showToast('Key limit, pindah key lain...', 'warning');
+                        sendBtn.disabled = false;
+                        setTimeout(() => sendMessage(), 500);
+                        return;
+                    }
+                    throw new Error(data.error.message || 'API Error');
+                }
+
+                const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Tidak ada respons.';
+                chatMessages.innerHTML += `
+                    <div class="chat-message ai">
+                        <div class="msg-sender">Nexus AI</div>
+                        <div class="msg-text">${responseText.replace(/\n/g, '<br>')}</div>
+                    </div>
+                `;
+
+                messageCounter++;
+                requestCounter++;
+                document.getElementById('messageCount').textContent = messageCounter;
+                document.getElementById('requestCount').textContent = requestCounter;
+
+                const codeMatch = responseText.match(/```html?\s*([\s\S]*?)```/);
+                if (codeMatch) {
+                    previewPanel.classList.add('visible');
+                    previewFrame.src = URL.createObjectURL(new Blob([codeMatch[1].trim()], { type: 'text/html' }));
+                }
+
+                sendBtn.disabled = false;
+            } catch (error) {
+                document.getElementById(typingId)?.remove();
+                chatMessages.innerHTML += `
+                    <div class="chat-message ai">
+                        <div class="msg-text" style="color: var(--danger);">Error: ${error.message}</div>
+                    </div>
+                `;
+                sendBtn.disabled = false;
+            }
+
+            removeAttachment();
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+                            }
 
             let fullPrompt = prompt;
             if (currentAttachment) {
