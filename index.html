@@ -275,3 +275,359 @@
         @media (min-width: 768px) { .sidebar-title { font-size: 0.8rem; } }
         .sidebar-title span { color: var(--accent); }
         .sidebar-close { width: 22px; height: 22px; background: rgba(0, 212, 255, 0.1); border: none; border-radius: 50%; color: var(--accent); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.7rem;
+        .sidebar-body { flex: 1; overflow-y: auto; padding: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+        @media (min-width: 768px) { .sidebar-body { padding: 0.65rem; gap: 0.6rem; } }
+        
+        .sidebar-section { padding: 0.5rem; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(0, 212, 255, 0.08); border-radius: 0.3rem; }
+        @media (min-width: 768px) { .sidebar-section { padding: 0.65rem; border-radius: 0.45rem; } }
+        .sidebar-section-title { font-family: 'Orbitron', sans-serif; font-size: 0.45rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.3rem; display: flex; align-items: center; gap: 0.2rem; }
+        @media (min-width: 768px) { .sidebar-section-title { font-size: 0.55rem; margin-bottom: 0.45rem; gap: 0.3rem; } }
+        .sidebar-section-title i { color: var(--accent); font-size: 0.5rem; }
+        @media (min-width: 768px) { .sidebar-section-title i { font-size: 0.6rem; } }
+        
+        .key-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 0.1rem; margin-top: 0.2rem; }
+        .key-dot { aspect-ratio: 1; border-radius: 2px; transition: all 0.3s; }
+        .key-dot.active { background: var(--success); box-shadow: 0 0 3px var(--success); }
+        .key-dot.exhausted { background: var(--danger); opacity: 0.5; }
+        .key-dot.standby { background: rgba(0, 212, 255, 0.3); }
+        
+        .proxy-actions { display: flex; flex-direction: column; gap: 0.15rem; }
+        @media (min-width: 768px) { .proxy-actions { gap: 0.2rem; } }
+        .proxy-btn { padding: 0.3rem; background: rgba(0, 212, 255, 0.1); border: 1px solid rgba(0, 212, 255, 0.2); border-radius: 0.2rem; color: var(--accent); font-size: 0.4rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.2rem; font-family: 'Rajdhani', sans-serif; }
+        @media (min-width: 768px) { .proxy-btn { padding: 0.4rem; font-size: 0.5rem; border-radius: 0.3rem; gap: 0.3rem; } }
+        .proxy-btn.tor-active { background: rgba(123, 44, 191, 0.15); color: var(--accent-2); }
+        
+        .quick-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.2rem; }
+        .stat-card { padding: 0.3rem; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(0, 212, 255, 0.06); border-radius: 0.2rem; text-align: center; }
+        @media (min-width: 768px) { .stat-card { padding: 0.45rem; } }
+        .stat-value { font-family: 'Orbitron', sans-serif; font-size: 0.7rem; font-weight: 800; color: var(--accent); }
+        @media (min-width: 768px) { .stat-value { font-size: 0.9rem; } }
+        .stat-label { font-size: 0.35rem; color: #64748b; text-transform: uppercase; }
+        
+        .sidebar-actions { display: flex; flex-direction: column; gap: 0.15rem; }
+        @media (min-width: 768px) { .sidebar-actions { gap: 0.2rem; } }
+        .action-btn { padding: 0.35rem; background: rgba(0, 212, 255, 0.08); border: 1px solid rgba(0, 212, 255, 0.15); border-radius: 0.2rem; color: var(--accent); font-size: 0.45rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.2rem; }
+        @media (min-width: 768px) { .action-btn { padding: 0.45rem; font-size: 0.55rem; border-radius: 0.3rem; gap: 0.3rem; } }
+        .action-btn.danger { background: rgba(255, 0, 110, 0.08); border-color: rgba(255, 0, 110, 0.15); color: var(--danger); }
+        
+        .sidebar-footer { padding: 0.5rem; border-top: 1px solid rgba(0, 212, 255, 0.08); }
+        @media (min-width: 768px) { .sidebar-footer { padding: 0.65rem; } }
+        .logout-btn { width: 100%; padding: 0.4rem; background: rgba(255, 0, 110, 0.1); border: 1px solid rgba(255, 0, 110, 0.2); border-radius: 0.3rem; color: var(--danger); font-family: 'Orbitron', sans-serif; font-size: 0.45rem; font-weight: 700; text-transform: uppercase; cursor: pointer; }
+        @media (min-width: 768px) { .logout-btn { padding: 0.5rem; font-size: 0.55rem; } }
+
+        /* Panels */
+        .panel-overlay { position: fixed; inset: 0; z-index: 900; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; padding: 0.5rem; }
+        .panel-overlay.open { display: flex; }
+        .panel-content { width: 100%; max-width: 340px; background: rgba(3, 0, 20, 0.98); border: 1px solid rgba(0, 212, 255, 0.15); border-radius: 0.5rem; padding: 0.8rem; }
+        @media (min-width: 768px) { .panel-content { max-width: 380px; padding: 1.1rem; border-radius: 0.7rem; } }
+        .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem; }
+        @media (min-width: 768px) { .panel-header { margin-bottom: 0.9rem; } }
+        .panel-title { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 0.7rem; }
+        @media (min-width: 768px) { .panel-title { font-size: 0.8rem; } }
+
+        .global-panel .panel-content { max-width: 360px; height: 55vh; display: flex; flex-direction: column; }
+        @media (min-width: 768px) { .global-panel .panel-content { max-width: 420px; height: 60vh; } }
+        .global-chat-box { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.6rem; }
+        .global-msg { padding: 0.35rem 0.4rem; border-radius: 0.35rem; max-width: 80%; }
+        .global-msg.self { align-self: flex-end; background: rgba(0, 212, 255, 0.15); }
+        .global-msg.other { align-self: flex-start; background: rgba(255, 255, 255, 0.05); }
+        .global-input-area { display: flex; gap: 0.2rem; margin-top: 0.4rem; padding-top: 0.4rem; border-top: 1px solid rgba(0, 212, 255, 0.08); }
+        .global-input { flex: 1; padding: 0.35rem; background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(0, 212, 255, 0.12); border-radius: 0.3rem; color: white; font-size: 0.6rem; outline: none; }
+
+        .contact-btn { padding: 0.55rem; background: rgba(0, 212, 255, 0.08); border: 1px solid rgba(0, 212, 255, 0.15); border-radius: 0.4rem; color: white; font-size: 0.6rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; text-decoration: none; margin-bottom: 0.4rem; }
+        @media (min-width: 768px) { .contact-btn { padding: 0.75rem; font-size: 0.7rem; border-radius: 0.5rem; gap: 0.6rem; margin-bottom: 0.5rem; } }
+        .contact-btn i { font-size: 0.8rem; }
+        @media (min-width: 768px) { .contact-btn i { font-size: 1rem; } }
+        .contact-btn.email i { color: var(--accent); }
+        .contact-btn.whatsapp i { color: #25D366; }
+
+        .history-item { padding: 0.35rem; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(0, 212, 255, 0.08); border-radius: 0.25rem; margin-bottom: 0.2rem; cursor: pointer; }
+        @media (min-width: 768px) { .history-item { padding: 0.5rem; border-radius: 0.35rem; margin-bottom: 0.3rem; } }
+
+        /* Toast */
+        .toast { position: fixed; bottom: 45px; left: 50%; transform: translateX(-50%); padding: 0.4rem 0.8rem; border-radius: 0.5rem; font-size: 0.5rem; font-weight: 600; z-index: 5000; animation: toastIn 0.2s ease-out; }
+        @media (min-width: 768px) { .toast { bottom: 55px; padding: 0.5rem 1rem; font-size: 0.6rem; } }
+        .toast.success { background: rgba(0, 255, 136, 0.95); color: #000; }
+        .toast.error { background: rgba(255, 0, 110, 0.95); color: #fff; }
+        .toast.warning { background: rgba(255, 190, 11, 0.95); color: #000; }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } }
+
+        .hidden { display: none !important; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body>
+    <div class="space-bg">
+        <div class="stars-layer" id="starsLayer"></div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="stars-layer" id="loadingStars"></div>
+        <div class="spaceship-3d">
+            <div class="rocket-nose"></div>
+            <div class="rocket-body"><div class="rocket-window"></div></div>
+            <div class="fin-left"></div>
+            <div class="fin-right"></div>
+            <div class="flame"></div>
+        </div>
+        <div class="loading-text">
+            <div class="loading-title">NEXUS</div>
+            <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
+            <div class="loading-status" id="loadingStatus"></div>
+        </div>
+    </div>
+
+    <!-- Auth Screen -->
+    <div id="authScreen" class="auth-screen">
+        <div class="station-panel">
+            <div style="text-align:center;margin-bottom:0.6rem;">
+                <i class="fa-solid fa-rocket" style="font-size:1.2rem;color:var(--accent);"></i>
+                <h1 style="font-family:'Orbitron';font-size:1.1rem;font-weight:900;margin-top:0.2rem;">NEXUS <span style="color:var(--accent)">STATION</span></h1>
+                <p style="font-size:0.4rem;color:#64748b;letter-spacing:0.2em;margin-top:0.1rem;">VIRZA PORTAL</p>
+            </div>
+            <div class="input-group"><i class="fa-solid fa-envelope"></i><input type="email" id="emailInput" placeholder="Email"></div>
+            <div class="input-group"><i class="fa-solid fa-lock"></i><input type="password" id="passInput" placeholder="Code"></div>
+            <button class="btn-primary" id="authBtn">Login</button>
+            <button class="btn-secondary btn-anonymous" id="anonBtn"><i class="fa-solid fa-user-secret"></i> Guest</button>
+            <button class="btn-secondary" id="googleBtn"><i class="fa-brands fa-google"></i> Google</button>
+            <div class="auth-toggle"><button id="authToggleBtn">Register</button></div>
+        </div>
+    </div>
+
+    <!-- Main UI -->
+    <div id="mainUI" class="main-ui">
+        <header class="header">
+            <div style="display:flex;align-items:center;gap:0.3rem;">
+                <button class="back-btn" id="backBtn"><i class="fa-solid fa-arrow-left"></i></button>
+                <div>
+                    <div style="display:flex;align-items:center;gap:0.15rem;">
+                        <div class="status-dot" id="statusDot"></div>
+                        <span style="font-size:0.35rem;color:#64748b;" id="statusText">CONNECTING</span>
+                    </div>
+                    <div class="time-display" id="timeDisplay">--:--</div>
+                    <div class="date-display" id="dateDisplay">--</div>
+                </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.25rem;">
+                <div class="gps-indicator"><div class="gps-dot" id="gpsDot"></div><span id="gpsText">GPS</span></div>
+                <div class="header-badge" id="keyBadge">2 Keys</div>
+                <button class="avatar-btn" id="avatarBtn">V</button>
+                <!-- INI TOMBOL HAMBURGER 3 GARIS -->
+                <button class="settings-btn" id="sidebarToggle">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div id="lobbyView" class="lobby-view no-scrollbar">
+                <div style="max-width:800px;margin:0 auto;">
+                    <div style="text-align:center;margin-bottom:0.5rem;"><h2 style="font-family:'Orbitron';font-size:0.9rem;">Welcome, <span style="color:var(--accent)" id="userName">User</span></h2></div>
+                    <div style="position:relative;margin-bottom:0.5rem;">
+                        <i class="fa-solid fa-search" style="position:absolute;left:0.5rem;top:50%;transform:translateY(-50%);color:var(--accent);opacity:0.6;font-size:0.65rem;"></i>
+                        <input type="text" class="chat-textarea" id="searchInput" placeholder="Search..." style="padding-left:1.6rem;padding:0.3rem 0.3rem 0.3rem 1.6rem;">
+                    </div>
+                    <div class="portal-grid" id="portalGrid"></div>
+                </div>
+            </div>
+
+            <div id="workspaceView" class="workspace-view">
+                <div class="chat-panel">
+                    <div class="chat-header">
+                        <div style="display:flex;align-items:center;gap:0.3rem;">
+                            <div id="chatPortalIcon" style="width:22px;height:22px;border-radius:0.25rem;display:flex;align-items:center;justify-content:center;font-size:0.65rem;"><i class="fa-solid fa-robot"></i></div>
+                            <div><div style="font-family:'Orbitron';font-size:0.55rem;font-weight:700;" id="chatPortalName">AI</div><div style="font-size:0.35rem;color:#64748b;" id="chatPortalDesc">Active</div></div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:0.15rem;padding:0.15rem 0.3rem;background:rgba(0,0,0,0.35);border-radius:0.4rem;font-size:0.35rem;" id="modeBadge"><div style="width:3px;height:3px;background:var(--success);border-radius:50%;"></div><span>Fast</span></div>
+                    </div>
+                    <div class="chat-box no-scrollbar" id="chatBox"><div class="message message-ai"><div class="message-text">Ready.</div></div></div>
+                    <div class="chat-input-area">
+                        <div class="chat-input-row">
+                            <div class="attachment-btn" id="attachBtn"><i class="fa-solid fa-plus"></i><div class="attachment-menu" id="attachMenu"><button data-type="image"><i class="fa-solid fa-image" style="color:var(--success)"></i> Photo</button><button data-type="txt"><i class="fa-solid fa-file-lines" style="color:var(--accent)"></i> TXT</button></div></div>
+                            <textarea class="chat-textarea" id="chatInput" placeholder="Type..." rows="1"></textarea>
+                            <button class="send-btn" id="sendBtn"><i class="fa-solid fa-paper-plane"></i></button>
+                        </div>
+                        <div class="speed-row">
+                            <span style="font-size:0.35rem;color:#64748b;">Speed:</span>
+                            <button class="speed-btn fast active" data-speed="fast">Fast</button>
+                            <button class="speed-btn balanced" data-speed="balanced">Bal</button>
+                            <button class="speed-btn quality" data-speed="quality">Quality</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+      <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header"><h3 class="sidebar-title">Vault <span>Control</span></h3><button class="sidebar-close" id="sidebarClose"><i class="fa-solid fa-xmark"></i></button></div>
+        <div class="sidebar-body no-scrollbar">
+            <div class="sidebar-section"><div class="sidebar-section-title"><i class="fa-solid fa-microchip"></i> AI</div><select id="modelSel" class="chat-textarea" style="padding:0.25rem;font-size:0.45rem;"><option value="gemini-1.5-flash">Flash</option><option value="gemini-1.5-flash-8b">8B</option><option value="gemini-1.5-pro">Pro</option></select></div>
+            <div class="sidebar-section"><div class="sidebar-section-title"><i class="fa-solid fa-key"></i> Keys</div><div style="font-size:0.4rem;">Active: <strong id="activeKeyNum">2</strong>/2</div><div class="key-grid" id="keyGrid"></div></div>
+            <div class="sidebar-section"><div class="sidebar-section-title"><i class="fa-solid fa-network-wired"></i> Proxy</div><div class="proxy-actions"><button class="proxy-btn" id="refreshProxyBtn"><i class="fa-solid fa-rotate"></i> Refresh (<span id="proxyNum">0</span>)</button><button class="proxy-btn" id="torBtn"><i class="fa-solid fa-user-secret"></i> Incognito: OFF</button><button class="proxy-btn" id="anonSidebarBtn"><i class="fa-solid fa-incognito"></i> Guest</button></div></div>
+            <div class="sidebar-section"><div class="sidebar-section-title"><i class="fa-solid fa-chart-line"></i> Stats</div><div class="quick-stats"><div class="stat-card"><div class="stat-value" id="msgNum">0</div><div class="stat-label">Msg</div></div><div class="stat-card"><div class="stat-value" id="reqNum">0</div><div class="stat-label">Req</div></div></div></div>
+            <div class="sidebar-actions"><button class="action-btn" id="globalBtn"><i class="fa-solid fa-users"></i> Lounge</button><button class="action-btn" id="historyBtn"><i class="fa-solid fa-clock-rotate-left"></i> History</button><button class="action-btn" id="clearBtn"><i class="fa-solid fa-broom"></i> Clear</button><button class="action-btn" id="contactBtn"><i class="fa-solid fa-envelope"></i> Contact</button></div>
+        </div>
+        <div class="sidebar-footer"><button class="logout-btn" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Logout</button></div>
+    </aside>
+
+    <!-- Panels -->
+    <div class="panel-overlay" id="histPanel"><div class="panel-content"><div class="panel-header"><h3 class="panel-title">History</h3><button class="sidebar-close" id="closeHist"><i class="fa-solid fa-xmark"></i></button></div><div id="histList" style="max-height:35vh;overflow-y:auto;"></div></div></div>
+    <div class="panel-overlay" id="contactPanel"><div class="panel-content"><div class="panel-header"><h3 class="panel-title">Contact</h3><button class="sidebar-close" id="closeContact"><i class="fa-solid fa-xmark"></i></button></div><a href="mailto:visi4ura@gmail.com" class="contact-btn email"><i class="fa-solid fa-envelope"></i><div><div style="font-weight:700;font-size:0.5rem;">Email</div><div style="font-size:0.45rem;color:#64748b;">visi4ura@gmail.com</div></div></a><a href="https://wa.me/6285715818953" target="_blank" class="contact-btn whatsapp"><i class="fa-brands fa-whatsapp"></i><div><div style="font-weight:700;font-size:0.5rem;">WhatsApp</div><div style="font-size:0.45rem;color:#64748b;">+62 857-1581-8953</div></div></a></div></div>
+    <div class="panel-overlay global-panel" id="globalPanel"><div class="panel-content"><div class="panel-header"><h3 class="panel-title" style="color:var(--accent)"><i class="fa-solid fa-users"></i> Lounge</h3><button class="sidebar-close" id="closeGlobal"><i class="fa-solid fa-xmark"></i></button></div><div class="global-chat-box no-scrollbar" id="globalBox"></div><div class="global-input-area"><input type="text" class="global-input" id="globalInput" placeholder="Chat..."><button class="send-btn" id="sendGlobal"><i class="fa-solid fa-paper-plane"></i></button></div></div></div>
+
+    <input type="file" id="fileInput" class="hidden" accept="image/*,.txt">
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const fbConfig = { apiKey: "AIzaSyBK-MehTTzURY5jT5stH363Y5_WE4iy-XA", authDomain: "volca-tools.firebaseapp.com", projectId: "volca-tools", storageBucket: "volca-tools.firebasestorage.app", messagingSenderId: "262525907487", appId: "1:262525907487:web:4abc37fa3b583223569b2a" };
+
+        const app = initializeApp(fbConfig); const auth = getAuth(app); const db = getFirestore(app);
+        let user = null, attach = null, speed = 'fast', keyIdx = 0, exhausted = new Set(), proxies = [], tor = false, msgs = 0, reqs = 0, activePortal = 'General', isLogin = true;
+        
+        // API & PROXY CONFIG
+        const KEYS = ["AIzaSyDkUSuxeVnUHUzkANYePkrJMOTeC8Gx71E", "AIzaSyAAtWkmgIQBhJIbsuQAx_y4l_MB2OX1UGs"];
+        const WORKERS = ["https://nexus.visiaura.workers.dev", "https://geminiapi.visiaura.workers.dev"]; // Dual Worker
+        const SPEED_CFG = { fast: { temperature: 0.5, maxOutputTokens: 1024 }, balanced: { temperature: 0.7, maxOutputTokens: 2048 }, quality: { temperature: 0.9, maxOutputTokens: 4096 } };
+        
+        const portals = [{id:'smart',name:'Smart',ic:'fa-brain',c:'#34d399',desc:'Chat'},{id:'code',name:'Code',ic:'fa-code',c:'#818cf8',desc:'Code'},{id:'img',name:'Image',ic:'fa-image',c:'#f472b6',desc:'Art'},{id:'vision',name:'Vision',ic:'fa-eye',c:'#fbbf24',desc:'Scan'},{id:'web',name:'Web',ic:'fa-globe',c:'#60a5fa',desc:'Site'},{id:'cyber',name:'Cyber',ic:'fa-shield',c:'#f87171',desc:'Sec'},{id:'math',name:'Math',ic:'fa-calculator',c:'#a78bfa',desc:'Math'},{id:'seo',name:'SEO',ic:'fa-magnifying-glass',c:'#2dd4bf',desc:'Opt'},{id:'data',name:'Data',ic:'fa-database',c:'#94a3b8',desc:'Data'},{id:'social',name:'Social',ic:'fa-hashtag',c:'#fb7185',desc:'Ads'},{id:'vid',name:'Video',ic:'fa-film',c:'#fb923c',desc:'Edit'},{id:'audio',name:'Audio',ic:'fa-music',c:'#4ade80',desc:'Sound'},{id:'logo',name:'Brand',ic:'fa-pen-nib',c:'#e879f9',desc:'Design'},{id:'lang',name:'Trans',ic:'fa-language',c:'#818cf8',desc:'Lang'},{id:'bug',name:'Debug',ic:'fa-bug',c:'#ef4444',desc:'Fix'},{id:'cloud',name:'Cloud',ic:'fa-cloud',c:'#38bdf8',desc:'Store'},{id:'sec',name:'Vault',ic:'fa-lock',c:'#fbbf24',desc:'Secure'},{id:'write',name:'Writer',ic:'fa-book',c:'#c084fc',desc:'Text'},{id:'game',name:'Game',ic:'fa-gamepad',c:'#f472b6',desc:'Dev'},{id:'law',name:'Law',ic:'fa-gavel',c:'#fca5a5',desc:'Legal'},{id:'health',name:'Health',ic:'fa-heart-pulse',c:'#ef4444',desc:'Med'},{id:'finance',name:'Finance',ic:'fa-chart-pie',c:'#22c55e',desc:'Fin'},{id:'edu',name:'Edu',ic:'fa-graduation-cap',c:'#3b82f6',desc:'Learn'},{id:'travel',name:'Travel',ic:'fa-plane',c:'#06b6d4',desc:'Trip'},{id:'recipe',name:'Chef',ic:'fa-utensils',c:'#f97316',desc:'Food'}];
+
+        function toast(m, t = 'success') { const e = document.querySelector('.toast'); if (e) e.remove(); const d = document.createElement('div'); d.className = 'toast ' + t; d.textContent = m; document.body.appendChild(d); setTimeout(() => d.remove(), 2000); }
+        function makeStars(el, n) { for (let i = 0; i < n; i++) { const s = document.createElement('div'); s.className = 'star'; s.style.cssText = `left:${Math.random() * 100}%;top:${Math.random() * 100}%;width:${Math.random() * 1 + 0.5}px;height:${Math.random() * 1 + 0.5}px;animation-delay:${Math.random() * 3}s`; el.appendChild(s); } }
+        
+        // LOADING: 3 Detik + Spaceship Fly Out
+        function runLoad() {
+            const statusText = document.getElementById('loadingStatus');
+            const rocket = document.querySelector('.spaceship-3d');
+            const loadingScreen = document.getElementById('loadingScreen');
+            const authScreen = document.getElementById('authScreen');
+            
+            const steps = [
+                { time: 200, text: "Initializing..." },
+                { time: 1100, text: "Connecting..." },
+                { time: 2100, text: "Systems Ready" },
+                { time: 2800, text: "LAUNCH!", isEnd: true }
+            ];
+
+            steps.forEach(step => {
+                setTimeout(() => {
+                    statusText.style.opacity = 0;
+                    setTimeout(() => {
+                        statusText.textContent = step.text;
+                        statusText.style.opacity = 1;
+                        if (step.isEnd) {
+                            rocket.classList.add('fly-out'); // Terbang!
+                            setTimeout(() => {
+                                loadingScreen.classList.add('hide');
+                                authScreen.style.display = 'flex';
+                            }, 800);
+                        }
+                    }, 150);
+                }, step.time);
+            });
+        }
+        
+        makeStars(document.getElementById('starsLayer'), 40); makeStars(document.getElementById('loadingStars'), 20); runLoad();
+
+        function updKeys() { document.getElementById('activeKeyNum').textContent = KEYS.length - exhausted.size; document.getElementById('keyBadge').textContent = (KEYS.length - exhausted.size) + ' Keys'; document.getElementById('keyGrid').innerHTML = KEYS.map((_, i) => `<div class="key-dot ${i === keyIdx && !exhausted.has(i) ? 'active' : exhausted.has(i) ? 'exhausted' : 'standby'}"></div>`).join(''); }
+        updKeys();
+        function getKey() { let a = 0; while (a < KEYS.length) { if (!exhausted.has(keyIdx)) { updKeys(); return { k: KEYS[keyIdx], i: keyIdx }; } keyIdx = (keyIdx + 1) % KEYS.length; a++; } toast('Keys limit', 'error'); return null; }
+        function markKey(i) { exhausted.add(i); keyIdx = (i + 1) % KEYS.length; updKeys(); toast('Key ' + (i + 1) + ' limit', 'warning'); }
+        function checkGPS() { if (!navigator.geolocation) { document.getElementById('gpsDot').classList.add('inactive'); document.getElementById('gpsText').textContent = 'X'; return; } navigator.geolocation.getCurrentPosition(() => { document.getElementById('gpsDot').classList.add('active'); document.getElementById('gpsText').textContent = 'ON'; }, () => { document.getElementById('gpsDot').classList.add('inactive'); document.getElementById('gpsText').textContent = 'OFF'; }, { timeout: 3000 }); }
+        function updTime() { const n = new Date(); const o = n.getTimezoneOffset(); let z = ''; if (o === -420) z = 'WIB'; else if (o === -480) z = 'WITA'; else if (o === -540) z = 'WIT'; else z = 'GMT'; document.getElementById('timeDisplay').textContent = n.toLocaleTimeString('id-ID', { hour12: false }); document.getElementById('dateDisplay').textContent = n.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric' }) + ' ' + z; }
+        setInterval(updTime, 1000); updTime();
+
+        onAuthStateChanged(auth, u => { if (u) { user = u; const n = u.displayName || u.email?.split('@')[0] || 'Guest'; document.getElementById('userName').textContent = n.toUpperCase(); document.getElementById('avatarBtn').textContent = n[0].toUpperCase(); document.getElementById('authScreen').style.display = 'none'; document.getElementById('mainUI').style.display = 'flex'; document.getElementById('statusDot').classList.add('online'); document.getElementById('statusText').textContent = 'ONLINE'; checkGPS(); loadHist(); initGlobal(); } });
+        document.getElementById('authBtn').onclick = () => { const e = document.getElementById('emailInput').value.trim(), p = document.getElementById('passInput').value; if (!e || !p) { toast('Fill', 'error'); return; } (isLogin ? signInWithEmailAndPassword : createUserWithEmailAndPassword)(auth, e, p).catch(er => toast(er.message, 'error')); };
+        document.getElementById('googleBtn').onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => toast(e.message, 'error'));
+        document.getElementById('anonBtn').onclick = () => handleAnon(); document.getElementById('anonSidebarBtn').onclick = () => handleAnon();
+        function handleAnon() { signInAnonymously(auth).catch(() => { user = { uid: 'g_' + Math.random().toString(36).substr(2, 8), isAnonymous: true }; document.getElementById('authScreen').style.display = 'none'; document.getElementById('mainUI').style.display = 'flex'; toast('Guest', 'info'); }); }
+        document.getElementById('authToggleBtn').onclick = () => { isLogin = !isLogin; document.getElementById('authToggleBtn').textContent = isLogin ? 'Register' : 'Login'; document.getElementById('authBtn').textContent = isLogin ? 'Login' : 'Register'; };
+        document.getElementById('logoutBtn').onclick = () => signOut(auth);
+
+        // === SIDEBAR FIX: ID "sidebarToggle" DIPAKAI, BUKAN "settingsBtn" ===
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarClose = document.getElementById('sidebarClose');
+        const avatarBtn = document.getElementById('avatarBtn');
+        
+        function toggleSidebar() { sidebar.classList.toggle('open'); }
+        // Pasang di ID yang bener
+        if (sidebarToggle) sidebarToggle.addEventListener('click', toggleSidebar);
+        if (avatarBtn) avatarBtn.addEventListener('click', toggleSidebar);
+        if (sidebarClose) sidebarClose.addEventListener('click', toggleSidebar);
+
+        // Swipe
+        let touchStartX = 0;
+        document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+        document.addEventListener('touchmove', e => {
+            const diff = e.touches[0].clientX - touchStartX;
+            if (touchStartX > window.innerWidth - 30 && diff < -40) sidebar.classList.add('open');
+        }, { passive: true });
+        sidebar.addEventListener('touchmove', e => {
+            if (e.touches[0].clientX - touchStartX > 50) sidebar.classList.remove('open');
+        }, { passive: true });
+
+        function renderP(d) { document.getElementById('portalGrid').innerHTML = d.map(p => `<div class="portal-card" data-id="${p.id}" data-name="${p.name}" data-ic="${p.ic}" data-c="${p.c}"><div class="portal-icon" style="background:${p.c}18;color:${p.c};border:1px solid ${p.c}30"><i class="fa-solid ${p.ic}"></i></div><div class="portal-name">${p.name}</div><div class="portal-desc">${p.desc}</div></div>`).join(''); }
+        renderP(portals);
+        document.getElementById('searchInput').oninput = function() { renderP(portals.filter(p => p.name.toLowerCase().includes(this.value.toLowerCase()))); };
+        document.getElementById('portalGrid').onclick = function(e) { const c = e.target.closest('.portal-card'); if (!c) return; activePortal = c.dataset.name; document.getElementById('lobbyView').classList.add('hidden'); document.getElementById('workspaceView').classList.add('active'); document.getElementById('backBtn').classList.add('show'); document.getElementById('chatPortalName').textContent = c.dataset.name; document.getElementById('chatPortalIcon').innerHTML = `<i class="fa-solid ${c.dataset.ic}"></i>`; document.getElementById('chatPortalIcon').style.background = c.dataset.c + '18'; document.getElementById('chatPortalIcon').style.color = c.dataset.c; document.getElementById('chatBox').innerHTML = `<div class="message message-ai"><div class="message-text">${c.dataset.name} ready.</div></div>`; };
+        document.getElementById('backBtn').onclick = function() { document.getElementById('lobbyView').classList.remove('hidden'); document.getElementById('workspaceView').classList.remove('active'); document.getElementById('backBtn').classList.remove('show'); };
+
+        async function sendMsg() { 
+            const inp = document.getElementById('chatInput'), pr = inp.value.trim(); 
+            if (!pr && !attach) return; 
+            const kd = getKey(); if (!kd) return; 
+            const { k, i } = kd; 
+            let parts = []; 
+            if (attach && attach.type === 'image' && attach.file) { 
+                const b64 = await new Promise(res => { const r = new FileReader(); r.onload = e => res(e.target.result.split(',')[1]); r.readAsDataURL(attach.file); }); 
+                parts.push({ inline_data: { mime_type: attach.file.type, data: b64 } }); 
+                parts.push({ text: pr || "Analyze" }); 
+            } else if (attach && attach.type === 'txt' && attach.file) { 
+                parts.push({ text: `[File: ${attach.name}]\n${(await attach.file.text()).substring(0, 2000)}\n\n${pr}` }); 
+            } else { 
+                parts.push({ text: pr }); 
+            } 
+            let uh = '<div class="message message-user">'; 
+            if (attach?.type === 'image' && attach.file) uh += `<img src="${await new Promise(r => { const rd = new FileReader(); rd.onload = e => r(e.target.result); rd.readAsDataURL(attach.file); })}" style="max-width:70px;border-radius:3px;margin-bottom:2px">`; 
+            uh += `<div class="message-text">${pr}</div></div>`; 
+            document.getElementById('chatBox').innerHTML += uh; 
+            inp.value = ''; attach = null; 
+            const tid = 't' + Date.now(); 
+            document.getElementById('chatBox').innerHTML += `<div id="${tid}" class="message message-ai"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`; 
+            try { 
+                const md = document.getElementById('modelSel').value;
+                // AMBIL WORKER ACAK DARI 2 URL YANG DIBERI
+                const workerUrl = WORKERS[Math.floor(Math.random() * WORKERS.length)];
+                const targetUrl = `https://generativelanguage.googleapis.com/v1beta/models/${md}:generateContent?key=${k}`;
+                const proxy = `${workerUrl}?url=${encodeURIComponent(targetUrl)}`;
+                
+                const re = await fetch(proxy, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts }], generationConfig: SPEED_CFG[speed] }) }); 
+                document.getElementById(tid)?.remove(); 
+                const dt = await re.json(); 
+                if (dt.error) { 
+                    if (dt.error.message?.includes('quota')) { markKey(i); toast('Key Limit', 'warning'); return; } 
+                    throw new Error(dt.error.message); 
+                } 
+                const tx = dt.candidates?.[0]?.content?.parts?.[0]?.text || 'No response'; 
+                document.getElementById('chatBox').innerHTML += `<div class="message message-ai"><div class="message-text">${tx.replace(/\n/g, '<br>')}</div></div>`; 
+                msgs++; document.getElementById('msgNum').textContent = msgs; 
+                if (user) addDoc(collection(db, 'artifacts', 'virza-v12', 'users', user.uid, 'history'), { prompt: pr, portal: activePortal, timestamp: serverTimestamp() }); 
+            } catch (e) { 
+                document.getElementById(tid)?.remove(); 
+                let errMsg = e.message;
+                if (e.message.includes('Failed to fetch')) errMsg = "Network Error (Cek Worker URL)";
+                document.getElementById('chatBox').innerHTML += `<div class="message message-ai"><div class="message-text" style="color:var(--danger)">Error: ${errMsg}</div></div>`; 
+            } 
+            document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight; 
+        }
+        document.getElementById('sendBtn').onclick = sendMsg;
+        document.getElementById('chatInput').onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } };
+    
+                                
