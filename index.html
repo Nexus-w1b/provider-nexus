@@ -967,25 +967,7 @@
             }
         }
 
-        // LOADING - 3 DETIK
-        function runLoad() {
-            const statuses = ['Initializing...', 'Connecting...', 'Ready'];
-            let i = 0;
-            const stEl = document.getElementById('loadingStatus');
-            const interval = setInterval(() => {
-                if (i < statuses.length) { stEl.textContent = statuses[i]; i++; }
-            }, 800);
-            
-            setTimeout(() => {
-                clearInterval(interval);
-                document.getElementById('loadingScreen').classList.add('hide');
-                document.getElementById('authScreen').style.display = 'flex';
-            }, 2800);
-        }
-
-        makeStars(document.getElementById('starsLayer'), 100);
-        makeStars(document.getElementById('loadingStars'), 50);
-        runLoad();
+        
 
         // KEY GRID
         function updKeys() {
@@ -993,7 +975,49 @@
             document.getElementById('activeKeyNum').textContent = act;
             document.getElementById('keyBadge').textContent = act + ' Keys';
             document.getElementById('keyGrid').innerHTML = KEYS.map((_, i) => {
-                let c = 'key-dot standby';
+         // LOADING LOGIC: 3 Detik, Text Transisi, Pesawat Terbang
+        function runLoad() {
+            const bar = document.querySelector('.progress-fill');
+            const rocket = document.querySelector('.spaceship-3d');
+            const statusText = document.getElementById('loadingStatus');
+            const loadingScreen = document.getElementById('loadingScreen');
+            const authScreen = document.getElementById('authScreen');
+
+            const duration = 3000; )
+            bar.style.animation = 'none';
+            bar.offsetHeight; 
+            bar.style.animation = `load ${duration}ms ease-out forwards`;
+
+            // Queue text berubah tiap 1 detik
+            const statuses = [
+                { time: 100, text: "Initializing..." },
+                { time: 1100, text: "Connecting..." },
+                { time: 2100, text: "Systems Ready" },
+                { time: 2800, text: "LAUNCH!" }
+            ];
+
+            statuses.forEach(item => {
+                setTimeout(() => {
+                    statusText.style.opacity = 0; // Fade out
+                    setTimeout(() => {
+                        statusText.textContent = item.text;
+                        statusText.style.opacity = 1; // Fade in
+                    }, 100);
+                }, item.time);
+            });
+
+            // Saat bar penuh (3 detik) -> Pesawat terbang
+            setTimeout(() => {
+                rocket.classList.add('fly-out'); // CSS class yang bikin pesawat terbang ke atas
+                
+                // Tunggu 0.8 detik (waktu pesawat keluar layar)
+                setTimeout(() => {
+                    loadingScreen.classList.add('hide');
+                    authScreen.style.display = 'flex';
+                }, 800);
+
+            }, duration);
+        }               let c = 'key-dot standby';
                 if (i === keyIdx && !exhausted.has(i)) c = 'key-dot active';
                 else if (exhausted.has(i)) c = 'key-dot exhausted';
                 return `<div class="${c}"></div>`;
