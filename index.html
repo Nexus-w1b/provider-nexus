@@ -43,107 +43,69 @@
         .star { position: absolute; background: white; border-radius: 50%; animation: twinkle 4s ease-in-out infinite; }
         @keyframes twinkle { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.6; } }
 
-        /* ========== LOADING SCREEN FIX ========== */
+                /* ========== LOADING SCREEN FIX 2.0 ========== */
         .loading-screen {
             position: fixed; inset: 0; z-index: 9999;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             background: linear-gradient(180deg, #030014 0%, #0a0a1f 50%, #030014 100%);
-            transition: opacity 0.5s ease-out;
+            transition: opacity 0.3s ease-out;
         }
         .loading-screen.hide { opacity: 0; pointer-events: none; }
 
         .spaceship-3d {
             position: relative; 
             width: 100px; height: 150px;
-            animation: shipFloat 3s ease-in-out infinite, shipEnter 0.8s ease-out forwards;
-            transition: transform 0.8s ease-in, opacity 0.8s ease-in;
+            /* Langsung muncul, animasi float pelan */
+            animation: shipFloat 2s ease-in-out infinite;
+            transition: transform 0.5s ease-in;
         }
-        /* KELAS BUAT TERBANG KELUAR */
+        /* Kelas terbang keluar */
         .spaceship-3d.fly-out {
-            transform: translateY(-200vh) scale(0.5); 
+            transform: translateY(-150vh) scale(0.5); 
             opacity: 0;
         }
 
         @media (min-width: 768px) { .spaceship-3d { width: 140px; height: 200px; } }
 
-        @keyframes shipEnter {
-            0% { transform: translateY(120px) scale(0.3); opacity: 0; }
-            70% { transform: translateY(-10px) scale(1.05); opacity: 1; }
-            100% { transform: translateY(0) scale(1); opacity: 1; }
-        }
         @keyframes shipFloat {
             0%, 100% { transform: translateY(0) rotateY(0); }
-            50% { transform: translateY(-8px) rotateY(5deg); }
+            50% { transform: translateY(-5px) rotateY(3deg); }
         }
 
         /* Pesawat Badan */
-        .rocket-body {
-            position: absolute; left: 50%; top: 35px; transform: translateX(-50%);
-            width: 35px; height: 80px;
-            background: linear-gradient(90deg, #1e293b, #94a3b8 50%, #1e293b);
-            border-radius: 50% 50% 15% 15% / 60% 60% 10% 10%;
-            box-shadow: 0 10px 25px rgba(0, 212, 255, 0.2);
-        }
+        .rocket-body { position: absolute; left: 50%; top: 35px; transform: translateX(-50%); width: 35px; height: 80px; background: linear-gradient(90deg, #1e293b, #94a3b8 50%, #1e293b); border-radius: 50% 50% 15% 15% / 60% 60% 10% 10%; box-shadow: 0 10px 25px rgba(0, 212, 255, 0.2); }
         @media (min-width: 768px) { .rocket-body { width: 50px; height: 110px; top: 45px; } }
 
-        .rocket-nose {
-            position: absolute; left: 50%; top: 0; transform: translateX(-50%);
-            width: 0; height: 0;
-            border-left: 18px solid transparent;
-            border-right: 18px solid transparent;
-            border-bottom: 35px solid #dc2626;
-        }
+        .rocket-nose { position: absolute; left: 50%; top: 0; transform: translateX(-50%); width: 0; height: 0; border-left: 18px solid transparent; border-right: 18px solid transparent; border-bottom: 35px solid #dc2626; }
         @media (min-width: 768px) { .rocket-nose { border-left: 25px solid transparent; border-right: 25px solid transparent; border-bottom: 45px solid #dc2626; } }
 
-        .rocket-window {
-            position: absolute; left: 50%; top: 50px; transform: translateX(-50%);
-            width: 12px; height: 12px;
-            background: radial-gradient(circle, #00d4ff, #0369a1);
-            border-radius: 50%; border: 2px solid #334155;
-            box-shadow: 0 0 10px var(--accent);
-            animation: windowGlow 2s infinite;
-        }
+        .rocket-window { position: absolute; left: 50%; top: 50px; transform: translateX(-50%); width: 12px; height: 12px; background: radial-gradient(circle, #00d4ff, #0369a1); border-radius: 50%; border: 2px solid #334155; box-shadow: 0 0 10px var(--accent); }
         @media (min-width: 768px) { .rocket-window { width: 18px; height: 18px; top: 65px; } }
-        @keyframes windowGlow { 0%, 100% { box-shadow: 0 0 10px var(--accent); } 50% { box-shadow: 0 0 20px var(--accent); } }
 
         .fin-left, .fin-right { position: absolute; bottom: 20px; }
         .fin-left { left: 6px; border-right: 18px solid #b91c1c; border-top: 8px solid transparent; border-bottom: 25px solid transparent; transform: rotate(-10deg); }
         .fin-right { right: 6px; border-left: 18px solid #b91c1c; border-top: 8px solid transparent; border-bottom: 25px solid transparent; transform: rotate(10deg); }
-        @media (min-width: 768px) { .fin-left { left: 10px; border-right-width: 25px; } .fin-right { right: 10px; border-left-width: 25px; } }
+        @media (min-width: 768px) { .fin-left { left: 10px; } .fin-right { right: 10px; } }
 
-        .flame {
-            position: absolute; left: 50%; bottom: -35px; transform: translateX(-50%);
-            width: 20px; height: 40px;
-            background: linear-gradient(to top, #ff3300, #ffcc00, #fff);
-            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-            animation: flicker 0.1s infinite alternate;
-            box-shadow: 0 0 15px #ff6600;
-        }
+        .flame { position: absolute; left: 50%; bottom: -35px; transform: translateX(-50%); width: 20px; height: 40px; background: linear-gradient(to top, #ff3300, #ffcc00, #fff); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; animation: flicker 0.1s infinite alternate; box-shadow: 0 0 15px #ff6600; }
         @media (min-width: 768px) { .flame { width: 30px; height: 55px; bottom: -45px; } }
         @keyframes flicker { 0% { transform: translateX(-50%) scaleY(1); } 100% { transform: translateX(-50%) scaleY(1.1); } }
 
-        .loading-text { margin-top: 50px; text-align: center; opacity: 0; animation: fadeIn 0.5s ease-out 0.5s forwards; }
-        @keyframes fadeIn { to { opacity: 1; } }
-        
-        .loading-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem; font-weight: 900; letter-spacing: 0.2em;
-            color: var(--accent); text-shadow: 0 0 15px var(--accent);
-        }
+        .loading-text { margin-top: 50px; text-align: center; }
+        .loading-title { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; font-weight: 900; letter-spacing: 0.2em; color: var(--accent); text-shadow: 0 0 15px var(--accent); }
         @media (min-width: 768px) { .loading-title { font-size: 2rem; } }
 
+        /* Progress Bar Cepat 1.5s */
         .progress-bar { width: 120px; height: 2px; background: rgba(0, 212, 255, 0.15); border-radius: 2px; margin: 0.6rem auto; overflow: hidden; }
         @media (min-width: 768px) { .progress-bar { width: 180px; height: 3px; margin: 0.8rem auto; } }
-        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); animation: load 3s ease-out forwards; }
-        @keyframes load { to { width: 100%; } }
+        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+        /* Animasi di kontrol JS, bukan CSS */
         
-        .loading-status {
-            font-family: 'Orbitron', sans-serif; font-size: 0.45rem; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-top: 0.3rem;
-            transition: opacity 0.2s ease-in-out;
-        }
+        .loading-status { font-family: 'Orbitron', sans-serif; font-size: 0.45rem; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-top: 0.3rem; }
         @media (min-width: 768px) { .loading-status { font-size: 0.55rem; } }
 
+      
         /* Auth & Main UI */
         .auth-screen { position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center; padding: 1rem; }
         .station-panel { width: 100%; max-width: 340px; padding: 1.5rem; background: rgba(3, 0, 20, 0.95); border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 0.8rem; position: relative; overflow: hidden; }
